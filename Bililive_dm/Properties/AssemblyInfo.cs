@@ -9,9 +9,9 @@ using System.Windows;
 [assembly: AssemblyTitle("西瓜直播弹幕助手")]
 [assembly: AssemblyDescription("西瓜直播弹幕助手")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("JerryYan")]
+[assembly: AssemblyCompany("Guation")]
 [assembly: AssemblyProduct("西瓜直播弹幕助手")]
-[assembly: AssemblyCopyright("JerryYan")]
+[assembly: AssemblyCopyright("挂神")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -52,5 +52,5 @@ using System.Windows;
 // 指定為預設值:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("0.2.1.3")]
-[assembly: AssemblyFileVersion("0.2.1.3")]
+[assembly: AssemblyVersion("2.2.0.6")]
+[assembly: AssemblyFileVersion("2.2.0.6")]

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -50,12 +51,14 @@ namespace Bililive_dm
         private bool LikeOpt;
         private bool Danmu1;
 
+        private readonly string version = "2.2.0.6";
 
         public MainWindow()
         {
 
             InitializeComponent();
 
+            Info.Text += version;
             //初始化日志
 
             try
@@ -145,6 +148,18 @@ namespace Bililive_dm
 
             Loaded += MainWindow_Loaded;
             Landu();
+            new Thread(() =>
+            {
+                try
+                {
+                    var json = JObject.Parse(Common.HttpGet("http://vps.guation.cn/Status"));
+
+                }
+                catch (Exception)
+                {
+
+                }
+            }).Start();
         }
 
         private void b_LogMessage(string e)
