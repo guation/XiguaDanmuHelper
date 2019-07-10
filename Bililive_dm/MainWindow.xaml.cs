@@ -6,6 +6,7 @@ using System.IO;
 using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -152,12 +153,23 @@ namespace Bililive_dm
             {
                 try
                 {
-                    var json = JObject.Parse(Common.HttpGet("http://vps.guation.cn/Status"));
-
+                    var data = Common.HttpGet("http://vps.guation.cn:8080/Status");
+                    var json = JObject.Parse(data);
+                    var version1 = version.Split('.');
+                    var version2 = json["version"].ToString().Split('.');
+                    for(var i = 0; i < 2; i++)
+                    {
+                        if (int.Parse(version1[i]) < int.Parse(version2[i]))
+                        {
+                            logging($"检测到版本更新，当前版本{version}，最新版本{(string)json["version"]}，新版本简介：{(string)json["update"]}。");
+                            break;
+                        }
+                    }
+                    if(json["msg"].ToString()!=null) logging("公告：" + json["msg"].ToString());
                 }
                 catch (Exception)
                 {
-
+                    logging("获取服务器信息失败，弹幕朗读功能可能会受影响。");
                 }
             }).Start();
         }
@@ -312,8 +324,9 @@ namespace Bililive_dm
                         Hecheng(danmakuModel.ChatModel.content);
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            AddDMText(danmakuModel.ChatModel.user,
-                                danmakuModel.ChatModel.content);
+                            AddDMText(danmakuModel.ChatModel.user, DelEmoji(danmakuModel.ChatModel.content));
+                            //经过多次测试发现弹幕中部分emoji不能被弹幕弹窗程序处理而导致主线程阻塞引发程序崩溃
+                            //即使未引发崩溃也会导致程序不能继续正常工作出现假死状态
                         }));
                     }
                     break;
@@ -479,11 +492,14 @@ namespace Bililive_dm
         // 合成
         public void Hecheng(string wenzi)
         {
-            var url = $"http://vps.guation.cn:8080/?msg={wenzi}";
-            if (Common.Download(url,"tmp/"+abc[0]+".mp3"))
+            if (Danmu1)
             {
-                abc[0]++;
-                abc[2]++;
+                var url = $"http://vps.guation.cn:8080/?msg={wenzi}";
+                if (Common.Download(url, "tmp/" + abc[0] + ".mp3"))
+                {
+                    abc[0]++;
+                    abc[2]++;
+                }
             }
         }
 
@@ -546,6 +562,20 @@ namespace Bililive_dm
             p.WaitForExit();//等待程序执行完退出进程
             p.Close();
             return output;
+        }
+        public string DelEmoji(string str)
+        {
+            foreach (var a in str)
+            {
+                byte[] bts = Encoding.UTF32.GetBytes(a.ToString());
+
+                if (bts[0].ToString() == "253" && bts[1].ToString() == "255")
+                {
+                    str = str.Replace(a.ToString(), "");
+                }
+
+            }
+            return str;
         }
 
         #region Runtime settings
