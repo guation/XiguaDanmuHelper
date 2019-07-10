@@ -159,13 +159,20 @@ namespace Bililive_dm
                     var version2 = json["version"].ToString().Split('.');
                     for(var i = 0; i < 2; i++)
                     {
-                        if (int.Parse(version1[i]) < int.Parse(version2[i]))
+                        try
                         {
-                            logging($"检测到版本更新，当前版本{version}，最新版本{(string)json["version"]}，新版本简介：{(string)json["update"]}。");
-                            break;
+                            if (int.Parse(version1[i]) < int.Parse(version2[i]))
+                            {
+                                logging($"检测到版本更新，当前版本{version}，最新版本{(string)json["version"]}，新版本简介：{(string)json["update"]}。");
+                                break;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            logging("检查更新失败，不影响软件使用。");
                         }
                     }
-                    if(json["msg"].ToString()!=null) logging("公告：" + json["msg"].ToString());
+                    if(json["msg"].ToString()!="") logging("公告：" + json["msg"].ToString());
                 }
                 catch (Exception)
                 {
