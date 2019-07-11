@@ -182,6 +182,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Config.cs" />
+    <Compile Include="DelEmoji.cs" />
     <Compile Include="IDanmakuWindow.cs" />
     <Compile Include="Mp3Player.cs" />
     <Compile Include="OptionDialog.xaml.cs">

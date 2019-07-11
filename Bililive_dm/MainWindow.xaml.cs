@@ -331,7 +331,7 @@ namespace Bililive_dm
                         Hecheng(danmakuModel.ChatModel.content);
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            AddDMText(danmakuModel.ChatModel.user, DelEmoji(danmakuModel.ChatModel.content));
+                            AddDMText(danmakuModel.ChatModel.user, DelEmoji.delEmoji(danmakuModel.ChatModel.content));
                             //经过多次测试发现弹幕中部分emoji不能被弹幕弹窗程序处理而导致主线程阻塞引发程序崩溃
                             //即使未引发崩溃也会导致程序不能继续正常工作出现假死状态
                         }));
@@ -502,7 +502,7 @@ namespace Bililive_dm
             if (Danmu1)
             {
                 var url = $"http://vps.guation.cn:8080/?msg={wenzi}";
-                if (Common.Download(url, "tmp/" + abc[0] + ".mp3"))
+                if (Common.HttpDownload(url, "tmp/" + abc[0] + ".mp3"))
                 {
                     abc[0]++;
                     abc[2]++;
@@ -570,20 +570,7 @@ namespace Bililive_dm
             p.Close();
             return output;
         }
-        public string DelEmoji(string str)
-        {
-            foreach (var a in str)
-            {
-                byte[] bts = Encoding.UTF32.GetBytes(a.ToString());
-
-                if (bts[0].ToString() == "253" && bts[1].ToString() == "255")
-                {
-                    str = str.Replace(a.ToString(), "");
-                }
-
-            }
-            return str;
-        }
+        
 
         #region Runtime settings
 

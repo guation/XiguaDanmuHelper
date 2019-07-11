@@ -15,4 +15,4 @@ https://ai.baidu.com/tech/speech/tts
 
 如发现语音无法读取问题请自行修改
 https://github.com/guation/XiguaDanmuHelper/blob/master/Bililive_dm/MainWindow.xaml.cs
-内的语言源服务器
+内的语音合成服务器
