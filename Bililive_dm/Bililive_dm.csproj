@@ -150,6 +150,7 @@
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Threading.Tasks, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Threading.Tasks.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -193,7 +194,9 @@
     </Compile>
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="SessionItem.cs" />
-    <Compile Include="Settings.cs" />
+    <Compile Include="Setting.xaml.cs">
+      <DependentUpon>Setting.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Store.cs" />
     <Compile Include="StoreModel.cs" />
     <Compile Include="WtfDanmakuWindow.cs">
@@ -205,6 +208,10 @@
     <Page Include="DanmakuTextControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Setting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="WpfDanmakuOverlay.xaml">
       <Generator>MSBuild:Compile</Generator>

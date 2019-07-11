@@ -52,6 +52,8 @@ namespace Bililive_dm
         private bool LikeOpt;
         private bool Danmu1;
 
+        int spd=5 , pit=5 , vol = 5 , per=4;
+
         private readonly string version = "2.2.0.6";
 
         public MainWindow()
@@ -155,21 +157,24 @@ namespace Bililive_dm
                 {
                     var data = Common.HttpGet("http://vps.guation.cn:8080/Status");
                     var json = JObject.Parse(data);
-                    var version1 = version.Split('.');
-                    var version2 = json["version"].ToString().Split('.');
-                    for(var i = 0; i < 2; i++)
+                    if (true)//是否检查更新
                     {
-                        try
+                        var version1 = version.Split('.');
+                        var version2 = json["version"].ToString().Split('.');
+                        for (var i = 0; i < 2; i++)
                         {
-                            if (int.Parse(version1[i]) < int.Parse(version2[i]))
+                            try
                             {
-                                logging($"检测到版本更新，当前版本{version}，最新版本{(string)json["version"]}，新版本简介：{(string)json["update"]}。");
-                                break;
+                                if (int.Parse(version1[i]) < int.Parse(version2[i]))
+                                {
+                                    logging($"检测到版本更新，当前版本{version}，最新版本{(string)json["version"]}，新版本简介：{(string)json["update"]}。");
+                                    break;
+                                }
                             }
-                        }
-                        catch (Exception)
-                        {
-                            logging("检查更新失败，不影响软件使用。");
+                            catch (Exception)
+                            {
+                                logging("检查更新失败，不影响软件使用。");
+                            }
                         }
                     }
                     if(json["msg"].ToString()!="") logging("公告：" + json["msg"].ToString());
@@ -451,6 +456,10 @@ namespace Bililive_dm
             AddDMText("提示", "這是一個測試😀😭", true);
         }
 
+        private void Setting_OnClick(object sender, RoutedEventArgs e)
+        {
+            new Setting().Show();
+        }
         private void OnLiveStop()
         {
             logging("提示：主播已下播");
@@ -459,9 +468,9 @@ namespace Bililive_dm
 
         private void Disconnbtn_OnClick(object sender, RoutedEventArgs e)
         {
-            abc[0] = 0;//断开连接清除弹幕统计
+            abc[0] = 0;//清除弹幕统计
             abc[1] = 0;//清除计划任务
-            abc[2] = 0;//关闭朗读
+            abc[2] = 0;//关闭弹幕朗读
             ConnBtn.IsEnabled = true;
             getDanmakuThread.Abort();
             getDanmakuThread = new Thread(() =>
@@ -501,7 +510,7 @@ namespace Bililive_dm
         {
             if (Danmu1)
             {
-                var url = $"http://vps.guation.cn:8080/?msg={wenzi}";
+                var url = $"http://vps.guation.cn:8080/?msg={wenzi}&spd={spd}&pit={pit}&vol={vol}&per={per}";
                 if (Common.HttpDownload(url, "tmp/" + abc[0] + ".mp3"))
                 {
                     abc[0]++;
@@ -513,7 +522,7 @@ namespace Bililive_dm
         private void Landu()
         {
             Mp3Player mp3Player = new Mp3Player();
-            Thread td = new Thread((ThreadStart)delegate
+            Thread td = new Thread((ThreadStart)delegate //不在主线程运行时无法打开音频文件需要进行委托 https://zhidao.baidu.com/question/1988707588257169467.html
             {
                 while (true)
                 {
@@ -536,7 +545,7 @@ namespace Bililive_dm
             td.Start();
         }
 
-        private string Runcmd(string str)
+        private string Runcmd(string str)//自动升级暂留接口
         {
             System.Diagnostics.Process p = new System.Diagnostics.Process();
             p.StartInfo.FileName = "cmd.exe";
@@ -544,28 +553,15 @@ namespace Bililive_dm
             p.StartInfo.RedirectStandardInput = true;//接受来自调用程序的输入信息
             p.StartInfo.RedirectStandardOutput = true;//由调用程序获取输出信息
             p.StartInfo.RedirectStandardError = true;//重定向标准错误输出
-            p.StartInfo.CreateNoWindow = true;//不显示程序窗口
+            p.StartInfo.CreateNoWindow = false;//不显示程序窗口
             p.Start();//启动程序
 
             //向cmd窗口发送输入信息
             p.StandardInput.WriteLine(str + "&exit");
-
             p.StandardInput.AutoFlush = true;
-            //p.StandardInput.WriteLine("exit");
             //向标准输入写入要执行的命令。这里使用&是批处理命令的符号，表示前面一个命令不管是否执行成功都执行后面(exit)命令，如果不执行exit命令，后面调用ReadToEnd()方法会假死
             //同类的符号还有&&和||前者表示必须前一个命令执行成功才会执行后面的命令，后者表示必须前一个命令执行失败才会执行后面的命令
-
-            //获取cmd窗口的输出信息
-            string output = p.StandardOutput.ReadToEnd();
-
-            //StreamReader reader = p.StandardOutput;
-            //string line=reader.ReadLine();
-            //while (!reader.EndOfStream)
-            //{
-            //    str += line + "  ";
-            //    line = reader.ReadLine();
-            //}
-
+            string output = p.StandardOutput.ReadToEnd();//获取cmd窗口的输出信息
             p.WaitForExit();//等待程序执行完退出进程
             p.Close();
             return output;
@@ -606,6 +602,14 @@ namespace Bililive_dm
         private void showBrand_OnUnchecked(object sender, RoutedEventArgs e)
         {
             User.showBrand = false;
+        }
+        private void showGrade_OnChecked(object sender, RoutedEventArgs e)
+        {
+            
+        }
+        private void showGrade_OnUnchecked(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private void ShowLike_OnChecked(object sender, RoutedEventArgs e)
