@@ -199,12 +199,6 @@
     </Compile>
     <Compile Include="Store.cs" />
     <Compile Include="StoreModel.cs" />
-    <Compile Include="WtfDanmakuWindow.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="WtfDanmakuWindow.Designer.cs">
-      <DependentUpon>WtfDanmakuWindow.cs</DependentUpon>
-    </Compile>
     <Page Include="DanmakuTextControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -212,10 +206,6 @@
     <Page Include="Setting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="WpfDanmakuOverlay.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="MainOverlay.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -232,9 +222,6 @@
     <Compile Include="OutlinedTextBlock.cs" />
     <Compile Include="DanmakuTextControl.xaml.cs">
       <DependentUpon>DanmakuTextControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="WpfDanmakuOverlay.xaml.cs">
-      <DependentUpon>WpfDanmakuOverlay.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainOverlay.xaml.cs">
       <DependentUpon>MainOverlay.xaml</DependentUpon>
@@ -273,9 +260,6 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="WtfDanmakuWindow.resx">
-      <DependentUpon>WtfDanmakuWindow.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="packages.config" />
