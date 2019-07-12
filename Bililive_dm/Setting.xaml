@@ -5,8 +5,54 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bililive_dm"
         mc:Ignorable="d"
-        Title="全局设置" Height="300" Width="500">
-    <DockPanel>
-        
-    </DockPanel>
+        Title="全局设置" Height="200" Width="500 ">
+    <StackPanel>
+        <DockPanel>
+            <TextBlock TextWrapping="Wrap" Text="弹幕朗读语速" VerticalAlignment="Center" Width="80" TextAlignment="Right"
+                       Margin="0,0,20,0" />
+            <TextBox TextWrapping="Wrap" DockPanel.Dock="Right" VerticalAlignment="Center" Width="70" Margin="38,0,0,0"
+                     Text="{Binding Value, ElementName=slider1}" HorizontalContentAlignment="Center" IsEnabled="False" />
+            <Slider x:Name="slider1" Style="{DynamicResource SimpleSlider}" VerticalAlignment="Center" Maximum="15" Minimum="0"
+                    Value="5" IsSnapToTickEnabled="True"/>
+        </DockPanel>
+        <DockPanel>
+            <TextBlock TextWrapping="Wrap" Text="弹幕朗读语调" VerticalAlignment="Center" Width="80" TextAlignment="Right"
+                       Margin="0,0,20,0" />
+            <TextBox TextWrapping="Wrap" DockPanel.Dock="Right" VerticalAlignment="Center" Width="70" Margin="38,0,0,0"
+                     Text="{Binding Value, ElementName=slider2}" HorizontalContentAlignment="Center" IsEnabled="False" />
+            <Slider x:Name="slider2" Style="{DynamicResource SimpleSlider}" VerticalAlignment="Center" Maximum="15" Minimum="0"
+                    Value="5" IsSnapToTickEnabled="True"/>
+        </DockPanel>
+        <DockPanel>
+            <TextBlock TextWrapping="Wrap" Text="弹幕朗读音量" VerticalAlignment="Center" Width="80" TextAlignment="Right"
+                       Margin="0,0,20,0" />
+            <TextBox TextWrapping="Wrap" DockPanel.Dock="Right" VerticalAlignment="Center" Width="70" Margin="38,0,0,0"
+                     Text="{Binding Value, ElementName=slider3}" HorizontalContentAlignment="Center" IsEnabled="False" />
+            <Slider x:Name="slider3" Style="{DynamicResource SimpleSlider}" VerticalAlignment="Center" Maximum="15" Minimum="0"
+                    Value="1" IsSnapToTickEnabled="True"/>
+        </DockPanel>
+        <DockPanel>
+            <TextBlock TextWrapping="Wrap" Text="弹幕朗读语速" VerticalAlignment="Top" Width="80" TextAlignment="Right"
+                       Margin="0,0,20,0" />
+            <TextBox TextWrapping="Wrap" DockPanel.Dock="Right" VerticalAlignment="Center" Width="70" Margin="38,0,0,0"
+                     Text="" HorizontalContentAlignment="Center" IsEnabled="False" />
+            <RadioButton Content="女声"/>
+            <RadioButton Content="男声"/>
+            <RadioButton Content="度逍遥"/>
+            <RadioButton Content="度丫丫" IsChecked="True"/>
+        </DockPanel>
+        <DockPanel>
+            <TextBlock  TextWrapping="Wrap" Text="朗读屏蔽词" VerticalAlignment="Center" Width="80" TextAlignment="Right"
+                       Margin="0,0,20,0" />
+            <TextBox x:Name="Textbox" TextWrapping="Wrap" Width="382" Text="" MouseEnter="Textbox_Enter" MouseLeave="Textbox_Leave"/>
+
+        </DockPanel>
+        <StackPanel VerticalAlignment="Center" DockPanel.Dock="Top">
+            <Button Content="保存设置"/>
+            <Button Content="保存退出"/>
+            <Button Content="还原默认"/>
+            <Button Content="关闭窗口"/>
+        </StackPanel>
+
+    </StackPanel>
 </Window>

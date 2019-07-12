@@ -47,14 +47,9 @@ namespace Bililive_dm
 
         private StoreModel settings;
 
-        private bool ChatOpt;
-        private bool GiftOpt;
-        private bool LikeOpt;
-        private bool Danmu1;
-
-        int spd=5 , pit=5 , vol = 5 , per=4;
-
         private readonly string version = "2.2.0.6";
+
+        public ConfigData ConfigData = new ConfigData();
 
         public MainWindow()
         {
@@ -64,19 +59,6 @@ namespace Bililive_dm
             Info.Text += version;
             //初始化日志
 
-            try
-            {
-                LiverName.Text = Properties.Settings.Default.name;
-            }
-            catch
-            {
-                LiverName.Text = "sy挂神";
-            }
-
-            ChatOpt = true;
-            GiftOpt = true;
-            LikeOpt = true;
-            Danmu1 = true;
             b = new Api();
             overlay_enabled = true;
             OpenOverlay();
@@ -89,7 +71,6 @@ namespace Bililive_dm
             //            b.OnMessage += ProcDanmaku;
             Api.LogMessage += b_LogMessage;
             Api.OnRoomCounting += b_ReceivedRoomCount;
-
 
             timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, FuckMicrosoft,
                 Dispatcher);
@@ -151,13 +132,22 @@ namespace Bililive_dm
 
             Loaded += MainWindow_Loaded;
             Landu();
+            try
+            {
+                var j = JObject.Parse(Config.Read());
+                ConfigData.Room = (string)j["room"];
+            }
+            catch
+            {
+
+            }
             new Thread(() =>
             {
                 try
                 {
                     var data = Common.HttpGet("http://vps.guation.cn:8080/Status");
                     var json = JObject.Parse(data);
-                    if (true)//是否检查更新
+                    if (ConfigData.canUpdate)//是否检查更新
                     {
                         var version1 = version.Split('.');
                         var version2 = json["version"].ToString().Split('.');
@@ -201,8 +191,8 @@ namespace Bililive_dm
         {
             var sc = Log.Template.FindName("LogScroll", Log) as ScrollViewer;
             sc?.ScrollToEnd();
-            showChat.IsChecked = ChatOpt;
-            showPresent.IsChecked = GiftOpt;
+            showChat.IsChecked = ConfigData.ShowChar;
+            showPresent.IsChecked = ConfigData.ShowPresent;
             try
             {
                 var isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.User |
@@ -330,7 +320,7 @@ namespace Bililive_dm
             switch (danmakuModel.MsgType)
             {
                 case MessageEnum.Chat:
-                    if (ChatOpt)
+                    if (ConfigData.ShowChar)
                     {
                         logging(danmakuModel.ChatModel.ToString());
                         Hecheng(danmakuModel.ChatModel.content);
@@ -346,7 +336,7 @@ namespace Bililive_dm
                     break;
                 case MessageEnum.Gift:
                     {
-                        if (GiftOpt)
+                        if (ConfigData.ShowPresent)
                         {
                             logging("收到礼物 : " + danmakuModel.GiftModel.user + " 赠送的 " + danmakuModel.GiftModel.count +
                                     " 个 " + danmakuModel.GiftModel.GetName());
@@ -362,7 +352,7 @@ namespace Bililive_dm
                     }
                 case MessageEnum.Join:
                     {
-                        if (GiftOpt)
+                        if (ConfigData.ShowPresent)
                         {
                             logging("粉丝团新成员 : 欢迎 " + danmakuModel.UserModel + " 加入了粉丝团");
                             Hecheng("欢迎 " + danmakuModel.UserModel + " 加入了粉丝团");
@@ -376,7 +366,7 @@ namespace Bililive_dm
                     }
                 case MessageEnum.Like:
                     {
-                        if (LikeOpt)
+                        if (ConfigData.ShowLike)
                         {
                             logging($"用户 {danmakuModel.UserModel} 点了喜欢");
                             AddDMText("点亮",
@@ -458,7 +448,10 @@ namespace Bililive_dm
 
         private void Setting_OnClick(object sender, RoutedEventArgs e)
         {
-            new Setting().Show();
+            Setting setting = new Setting();
+            Setting.GetConfig += GetConfig;
+            Setting.SetConfig += SetConfig;
+            setting.ShowDialog();
         }
         private void OnLiveStop()
         {
@@ -508,9 +501,9 @@ namespace Bililive_dm
         // 合成
         public void Hecheng(string wenzi)
         {
-            if (Danmu1)
+            if (ConfigData.DanMu)
             {
-                var url = $"http://vps.guation.cn:8080/?msg={wenzi}&spd={spd}&pit={pit}&vol={vol}&per={per}";
+                var url = $"http://vps.guation.cn:8080/?msg={wenzi}&spd={ConfigData.spd}&pit={ConfigData.pit}&vol={ConfigData.vol}&per={ConfigData.per}";
                 if (Common.HttpDownload(url, "tmp/" + abc[0] + ".mp3"))
                 {
                     abc[0]++;
@@ -534,7 +527,7 @@ namespace Bililive_dm
                     if (abc[2] > 10)
                     {
                         abc[1] = abc[0]-1;
-                        abc[2] = 1;
+                        abc[2] = 1;//朗读最后一条弹幕
                         logging("弹幕缓存上限已跳过朗读部分弹幕。");
                     }
                     Thread.Sleep(200);
@@ -566,7 +559,16 @@ namespace Bililive_dm
             p.Close();
             return output;
         }
-        
+
+        public void SetConfig(ConfigData configData)
+        {
+            ConfigData = configData;
+            Config.Write(ConfigData);
+        }
+        public ConfigData GetConfig()
+        {
+            return ConfigData;
+        }
 
         #region Runtime settings
 
@@ -576,58 +578,57 @@ namespace Bililive_dm
 
         private void ShowChat_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            ChatOpt = false;
+            ConfigData.ShowChar = false;
         }
 
         private void showPresent_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            GiftOpt = false;
+            ConfigData.ShowPresent = false;
         }
 
         private void showPresent_OnChecked(object sender, RoutedEventArgs e)
         {
-            GiftOpt = true;
+            ConfigData.ShowPresent = true;
         }
 
         private void showChat_OnChecked(object sender, RoutedEventArgs e)
         {
-            ChatOpt = true;
+            ConfigData.ShowChar = true;
         }
 
         private void showBrand_OnChecked(object sender, RoutedEventArgs e)
         {
-            User.showBrand = true;
+            ConfigData.ShowBrand = User.showBrand = true;
         }
 
         private void showBrand_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            User.showBrand = false;
+            ConfigData.ShowBrand =  User.showBrand = false;
         }
         private void showGrade_OnChecked(object sender, RoutedEventArgs e)
         {
-            
+            ConfigData.ShowGrade = true;
         }
         private void showGrade_OnUnchecked(object sender, RoutedEventArgs e)
         {
-
+            ConfigData.ShowGrade = false;
         }
 
         private void ShowLike_OnChecked(object sender, RoutedEventArgs e)
         {
-            LikeOpt = true;
+            ConfigData.ShowLike = true;
         }
-
         private void ShowLike_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            LikeOpt = false;
+            ConfigData.ShowLike = false;
         }
         private void Danmu_OnChecked(object sender, RoutedEventArgs e)
         {
-            Danmu1 = true;
+            ConfigData.DanMu = true;
         }
         private void Danmu_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            Danmu1 = false;
+            ConfigData.DanMu = false;
         }
     }
 }

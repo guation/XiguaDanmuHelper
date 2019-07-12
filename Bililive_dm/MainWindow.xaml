@@ -30,7 +30,7 @@
                     x:Name="DisconnBtn" Click="Disconnbtn_OnClick" />
             <Button x:Name="Test" Content="测试效果" HorizontalAlignment="Left" VerticalAlignment="Center"
                     Click="Test_OnClick" Margin="20,3,0,3" Width="60" />
-            <Button x:Name="Setting" Content="更多设置" HorizontalAlignment="Left" VerticalAlignment="Center"
+            <Button x:Name="SettingButton" Content="更多设置" HorizontalAlignment="Left" VerticalAlignment="Center"
                     Click="Setting_OnClick" Margin="20,3,0,3" Width="60" />
         </StackPanel>
         <StackPanel VerticalAlignment="Center" DockPanel.Dock="Top" Orientation="Horizontal">
