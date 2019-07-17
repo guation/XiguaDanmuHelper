@@ -50,6 +50,7 @@ namespace Bililive_dm
         private readonly string version = "2.2.0.6";
 
         public ConfigData ConfigData = new ConfigData();
+        public Logger Logger = new Logger();
 
         public MainWindow()
         {
@@ -58,7 +59,7 @@ namespace Bililive_dm
 
             Info.Text += version;
             //初始化日志
-
+            LiverName.Text = "挂神";
             b = new Api();
             overlay_enabled = true;
             OpenOverlay();
@@ -131,15 +132,34 @@ namespace Bililive_dm
             logging("可以点击日志复制到剪贴板");
 
             Loaded += MainWindow_Loaded;
+            Setting.GetConfig += GetConfig;
+            Setting.SetConfig += SetConfig;
             Landu();
+            System.IO.Directory.CreateDirectory("log");//创造日志文件夹
             try
             {
                 var j = JObject.Parse(Config.Read());
-                ConfigData.Room = (string)j["room"];
+                LiverName.Text = ConfigData.Room = (string)j["Room"];
+                showBrand.IsChecked = ConfigData.ShowBrand = (bool)j["ShowBrand"];
+                showGrade.IsChecked = ConfigData.ShowGrade = (bool)j["ShowGrade"];
+                showChat.IsChecked = ConfigData.ShowChat = (bool)j["ShowChat"];
+                showPresent.IsChecked = ConfigData.ShowPresent = (bool)j["ShowPresent"];
+                showLike.IsChecked = ConfigData.ShowLike = (bool)j["ShowLike"];
+                danMu.IsChecked = ConfigData.DanMu = (bool)j["DanMu"];
+                ConfigData.spd = (int)j["spd"];
+                ConfigData.pit = (int)j["pit"];
+                ConfigData.vol = (int)j["vol"];
+                ConfigData.per = (int)j["per"];
+                ConfigData.CanUpdate = (bool)j["CanUpdate"];
+                ConfigData.DeBug = (bool)j["DeBug"];
+                ConfigData.BlackList = (string)j["BlackList"];
+
             }
             catch
             {
-
+                logging("配置文件损坏或不存在，已生成新的配置文件。");
+                ConfigData = new ConfigData();
+                Config.Write(ConfigData);
             }
             new Thread(() =>
             {
@@ -147,7 +167,7 @@ namespace Bililive_dm
                 {
                     var data = Common.HttpGet("http://vps.guation.cn:8080/Status");
                     var json = JObject.Parse(data);
-                    if (ConfigData.canUpdate)//是否检查更新
+                    if (ConfigData.CanUpdate)//是否检查更新
                     {
                         var version1 = version.Split('.');
                         var version2 = json["version"].ToString().Split('.');
@@ -191,7 +211,7 @@ namespace Bililive_dm
         {
             var sc = Log.Template.FindName("LogScroll", Log) as ScrollViewer;
             sc?.ScrollToEnd();
-            showChat.IsChecked = ConfigData.ShowChar;
+            showChat.IsChecked = ConfigData.ShowChat;
             showPresent.IsChecked = ConfigData.ShowPresent;
             try
             {
@@ -217,6 +237,7 @@ namespace Bililive_dm
 
         private void MainWindow_Closed(object sender, EventArgs e)
         {
+            Config.Write(ConfigData);
         }
 
         ~MainWindow()
@@ -264,6 +285,7 @@ namespace Bililive_dm
 
         private async void connbtn_Click(object sender, RoutedEventArgs e)
         {
+            Config.Write(ConfigData);
             Name = LiverName.Text.Trim();
             b = new Api(Name);
 
@@ -271,9 +293,7 @@ namespace Bililive_dm
             DisconnBtn.IsEnabled = false;
             var connectresult = false;
             logging("正在连接");
-
             connectresult = await b.ConnectAsync();
-
             if (connectresult)
             {
                 logging("連接成功");
@@ -320,7 +340,7 @@ namespace Bililive_dm
             switch (danmakuModel.MsgType)
             {
                 case MessageEnum.Chat:
-                    if (ConfigData.ShowChar)
+                    if (ConfigData.ShowChat)
                     {
                         logging(danmakuModel.ChatModel.ToString());
                         Hecheng(danmakuModel.ChatModel.content);
@@ -377,17 +397,24 @@ namespace Bililive_dm
             }
         }
 
-        public void logging(string text)
+        public void logging(string text , string level = "info")
         {
             if (Log.Dispatcher.CheckAccess())
                 lock (_messageQueue)
                 {
                     if (_messageQueue.Count >= _maxCapacity) _messageQueue.RemoveAt(0);
-
-                    _messageQueue.Add("[" + DateTime.Now.ToString("T") + "]" + text);
+                    if(level == "debug" && ConfigData.DeBug)
+                    {
+                        _messageQueue.Add("[" + DateTime.Now.ToString("T") + "][debug]" + text);
+                    }
+                    else if(level == "info")
+                    {
+                        _messageQueue.Add("[" + DateTime.Now.ToString("T") + "]" + text);
+                    }
+                    Logger.SaveLog("[" + DateTime.Now.ToString("T") + "]" + text , level);
                 }
             else
-                Log.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => logging(text)));
+                Log.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => logging(text ,level)));
         }
 
         public void AddDMText(string notify, string text, bool warn = false)
@@ -444,6 +471,7 @@ namespace Bililive_dm
         public void Test_OnClick(object sender, RoutedEventArgs e)
         {
             AddDMText("提示", "這是一個測試😀😭", true);
+            logging("debug", "debug");
         }
 
         private void Setting_OnClick(object sender, RoutedEventArgs e)
@@ -578,7 +606,7 @@ namespace Bililive_dm
 
         private void ShowChat_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            ConfigData.ShowChar = false;
+            ConfigData.ShowChat = false;
         }
 
         private void showPresent_OnUnchecked(object sender, RoutedEventArgs e)
@@ -593,7 +621,7 @@ namespace Bililive_dm
 
         private void showChat_OnChecked(object sender, RoutedEventArgs e)
         {
-            ConfigData.ShowChar = true;
+            ConfigData.ShowChat = true;
         }
 
         private void showBrand_OnChecked(object sender, RoutedEventArgs e)
@@ -604,6 +632,7 @@ namespace Bililive_dm
         private void showBrand_OnUnchecked(object sender, RoutedEventArgs e)
         {
             ConfigData.ShowBrand =  User.showBrand = false;
+            Config.Write(ConfigData);
         }
         private void showGrade_OnChecked(object sender, RoutedEventArgs e)
         {
@@ -630,5 +659,6 @@ namespace Bililive_dm
         {
             ConfigData.DanMu = false;
         }
+
     }
 }

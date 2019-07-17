@@ -41,14 +41,10 @@
                       IsChecked="False" Checked="showBrand_OnChecked" Unchecked="showBrand_OnUnchecked" Margin="10,0,0,0"/>
             <CheckBox Content="等级" HorizontalAlignment="Left" VerticalAlignment="Center" x:Name="showGrade"
                       IsChecked="False" Checked="showGrade_OnChecked" Unchecked="showGrade_OnUnchecked" Margin="10,0,0,0"/>
-            <CheckBox Content="聊天" HorizontalAlignment="Left" VerticalAlignment="Center" x:Name="showChat"
-                      IsChecked="True" Checked="showChat_OnChecked" Unchecked="ShowChat_OnUnchecked" Margin="10,0,0,0"/>
-            <CheckBox Content="礼物及粉丝团" HorizontalAlignment="Left" VerticalAlignment="Center" x:Name="showPresent"
-                      IsChecked="True" Checked="showPresent_OnChecked" Unchecked="showPresent_OnUnchecked" Margin="10,0,0,0"/>
-            <CheckBox Content="点亮消息" HorizontalAlignment="Left" VerticalAlignment="Center" x:Name="showLike"
-                      IsChecked="True" Checked="ShowLike_OnChecked" Unchecked="ShowLike_OnUnchecked" Margin="10,0,0,0"/>
-            <CheckBox Content="弹幕朗读" HorizontalAlignment="Left" VerticalAlignment="Center" x:Name="danMu"
-                      IsChecked="True" Checked="Danmu_OnChecked" Unchecked="Danmu_OnUnchecked" Margin="10,0,0,0"/>
+            <CheckBox Content="聊天" HorizontalAlignment="Left" VerticalAlignment="Center" x:Name="showChat" Checked="showChat_OnChecked" Unchecked="ShowChat_OnUnchecked" Margin="10,0,0,0"/>
+            <CheckBox Content="礼物及粉丝团" HorizontalAlignment="Left" VerticalAlignment="Center" x:Name="showPresent" Checked="showPresent_OnChecked" Unchecked="showPresent_OnUnchecked" Margin="10,0,0,0"/>
+            <CheckBox Content="点亮消息" HorizontalAlignment="Left" VerticalAlignment="Center" x:Name="showLike" Checked="ShowLike_OnChecked" Unchecked="ShowLike_OnUnchecked" Margin="10,0,0,0"/>
+            <CheckBox Content="弹幕朗读" HorizontalAlignment="Left" VerticalAlignment="Center" x:Name="danMu" Checked="Danmu_OnChecked" Unchecked="Danmu_OnUnchecked" Margin="10,0,0,0"/>
 
         </StackPanel>
 

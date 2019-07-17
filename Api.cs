@@ -126,10 +126,20 @@ namespace XiguaDanmakuHelper
                         if (_j["cells"].Any())
                         {
                             isValidRoom = true;
-                            isLive = (bool)_j["cells"][0]["anchor"]["user_info"]["is_living"];
-                            RoomID = (long)_j["cells"][0]["anchor"]["room_id"];
-                            liverName = new User((JObject)_j["cells"][0]).ToString();
-                            user = new User((JObject)_j["cells"][0]);
+                            
+                            try
+                            {
+                                isLive = (bool)_j["cells"][0]["anchor"]["user_info"]["is_living"];
+                                RoomID = (long)_j["cells"][0]["anchor"]["room_id"];
+                                liverName = new User((JObject)_j["cells"][0]).ToString();
+                                user = new User((JObject)_j["cells"][0]);
+                            }
+                            catch (Exception e)
+                            {
+                                LogMessage?.Invoke(e.ToString());
+                                isLive = false;
+                                return false;
+                            }
                         }
                         else
                         {
@@ -202,10 +212,19 @@ namespace XiguaDanmakuHelper
 
                         if (_j["cells"].Any())
                         {
-                            isValidRoom = true;
-                            isLive = (bool)_j["cells"][0]["anchor"]["user_info"]["is_living"];
-                            RoomID = (int)_j["cells"][0]["anchor"]["room_id"];
-                            liverName = (new User((JObject)_j["cells"][0])).ToString();
+                            try
+                            {
+                                isValidRoom = true;
+                                isLive = (bool)_j["cells"][0]["anchor"]["user_info"]["is_living"];
+                                RoomID = (int)_j["cells"][0]["anchor"]["room_id"];
+                                liverName = (new User((JObject)_j["cells"][0])).ToString();
+                            }
+                            catch(Exception err)
+                            {
+                                LogMessage?.Invoke(err.ToString());
+                                return false;
+                            }
+                            
                         }
                         else
                         {

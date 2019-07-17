@@ -5,53 +5,51 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bililive_dm"
         mc:Ignorable="d"
-        Title="全局设置" Height="200" Width="500 ">
+        Title="全局设置" Height="220" Width="500 " ResizeMode="NoResize">
     <StackPanel>
-        <DockPanel>
+        <DockPanel Height="25">
             <TextBlock TextWrapping="Wrap" Text="弹幕朗读语速" VerticalAlignment="Center" Width="80" TextAlignment="Right"
-                       Margin="0,0,20,0" />
+                       Margin="0,0,20,0" Height="25" />
             <TextBox TextWrapping="Wrap" DockPanel.Dock="Right" VerticalAlignment="Center" Width="70" Margin="38,0,0,0"
                      Text="{Binding Value, ElementName=slider1}" HorizontalContentAlignment="Center" IsEnabled="False" />
-            <Slider x:Name="slider1" Style="{DynamicResource SimpleSlider}" VerticalAlignment="Center" Maximum="15" Minimum="0"
-                    Value="5" IsSnapToTickEnabled="True"/>
+            <Slider x:Name="slider1" Style="{DynamicResource SimpleSlider}" Maximum="15" Minimum="0"
+                    Value="5" IsSnapToTickEnabled="True" ValueChanged="Slider1_ValueChanged"/>
         </DockPanel>
-        <DockPanel>
+        <DockPanel Height="25">
             <TextBlock TextWrapping="Wrap" Text="弹幕朗读语调" VerticalAlignment="Center" Width="80" TextAlignment="Right"
-                       Margin="0,0,20,0" />
+                       Margin="0,0,20,0" Height="25" />
             <TextBox TextWrapping="Wrap" DockPanel.Dock="Right" VerticalAlignment="Center" Width="70" Margin="38,0,0,0"
                      Text="{Binding Value, ElementName=slider2}" HorizontalContentAlignment="Center" IsEnabled="False" />
-            <Slider x:Name="slider2" Style="{DynamicResource SimpleSlider}" VerticalAlignment="Center" Maximum="15" Minimum="0"
-                    Value="5" IsSnapToTickEnabled="True"/>
+            <Slider x:Name="slider2" Style="{DynamicResource SimpleSlider}" Maximum="15" Minimum="0"
+                    Value="5" IsSnapToTickEnabled="True" ValueChanged="Slider2_ValueChanged"/>
         </DockPanel>
-        <DockPanel>
+        <DockPanel Height="25">
             <TextBlock TextWrapping="Wrap" Text="弹幕朗读音量" VerticalAlignment="Center" Width="80" TextAlignment="Right"
-                       Margin="0,0,20,0" />
+                       Margin="0,0,20,0" Height="25" />
             <TextBox TextWrapping="Wrap" DockPanel.Dock="Right" VerticalAlignment="Center" Width="70" Margin="38,0,0,0"
                      Text="{Binding Value, ElementName=slider3}" HorizontalContentAlignment="Center" IsEnabled="False" />
-            <Slider x:Name="slider3" Style="{DynamicResource SimpleSlider}" VerticalAlignment="Center" Maximum="15" Minimum="0"
-                    Value="1" IsSnapToTickEnabled="True"/>
+            <Slider x:Name="slider3" Style="{DynamicResource SimpleSlider}" Maximum="15" Minimum="0"
+                    Value="1" IsSnapToTickEnabled="True" ValueChanged="Slider3_ValueChanged"/>
         </DockPanel>
-        <DockPanel>
+        <DockPanel Height="25">
             <TextBlock TextWrapping="Wrap" Text="弹幕朗读语速" VerticalAlignment="Top" Width="80" TextAlignment="Right"
-                       Margin="0,0,20,0" />
-            <TextBox TextWrapping="Wrap" DockPanel.Dock="Right" VerticalAlignment="Center" Width="70" Margin="38,0,0,0"
+                       Margin="0,0,20,0" Height="25" />
+            <TextBox x:Name="TextBox" TextWrapping="Wrap" DockPanel.Dock="Right" VerticalAlignment="Center" Width="70" Margin="38,0,0,0"
                      Text="" HorizontalContentAlignment="Center" IsEnabled="False" />
-            <RadioButton Content="女声"/>
-            <RadioButton Content="男声"/>
-            <RadioButton Content="度逍遥"/>
-            <RadioButton Content="度丫丫" IsChecked="True"/>
+            <RadioButton x:Name="RadioButton1" Content="女声" Checked="RadioButton1_Checked"/>
+            <RadioButton x:Name="RadioButton2" Content="男声" Checked="RadioButton2_Checked"/>
+            <RadioButton x:Name="RadioButton3" Content="度逍遥" Checked="RadioButton3_Checked"/>
+            <RadioButton x:Name="RadioButton4" Content="度丫丫" Checked="RadioButton4_Checked"/>
         </DockPanel>
-        <DockPanel>
+        <DockPanel Height="25">
             <TextBlock  TextWrapping="Wrap" Text="朗读屏蔽词" VerticalAlignment="Center" Width="80" TextAlignment="Right"
-                       Margin="0,0,20,0" />
-            <TextBox x:Name="Textbox" TextWrapping="Wrap" Width="382" Text="" MouseEnter="Textbox_Enter" MouseLeave="Textbox_Leave"/>
+                       Margin="0,0,20,0" Height="25" />
+            <TextBox x:Name="Textbox" Text="需要屏蔽的内容，以|为分割" MouseEnter="Textbox_Enter" MouseLeave="Textbox_Leave" FontSize="14" VerticalContentAlignment="Stretch" Height="25" VerticalAlignment="Top" TextChanged="TextChanged"/>
 
         </DockPanel>
-        <StackPanel VerticalAlignment="Center" DockPanel.Dock="Top">
-            <Button Content="保存设置"/>
-            <Button Content="保存退出"/>
-            <Button Content="还原默认"/>
-            <Button Content="关闭窗口"/>
+        <StackPanel DockPanel.Dock="Top">
+            <Button Content="关闭窗口" Height="30" Click="Button_Click_3"/>
+            <Button Content="关于程序" Height="30" Click="Button_Click_4"/>
         </StackPanel>
 
     </StackPanel>

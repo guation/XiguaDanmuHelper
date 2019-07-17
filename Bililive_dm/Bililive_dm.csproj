@@ -184,9 +184,7 @@
     </ApplicationDefinition>
     <Compile Include="DelEmoji.cs" />
     <Compile Include="IDanmakuWindow.cs" />
-    <Compile Include="Info.xaml.cs">
-      <DependentUpon>Info.xaml</DependentUpon>
-    </Compile>
+    <Compile Include="Logger.cs" />
     <Compile Include="Mp3Player.cs" />
     <Compile Include="OptionDialog.xaml.cs">
       <DependentUpon>OptionDialog.xaml</DependentUpon>
@@ -199,15 +197,12 @@
     <Compile Include="Setting.xaml.cs">
       <DependentUpon>Setting.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Settings.cs" />
     <Compile Include="Store.cs" />
     <Compile Include="StoreModel.cs" />
     <Page Include="DanmakuTextControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Info.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Setting.xaml">
       <SubType>Designer</SubType>

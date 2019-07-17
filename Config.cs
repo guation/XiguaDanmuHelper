@@ -62,23 +62,24 @@ namespace XiguaDanmakuHelper
     }
     public class ConfigData
     {
-        public string RoomID { get; set; } = "162474";
-        public string UserName { get; set; } = "sy挂神";
+        public string RoomID { get; } = "162474";
+        public string UserName { get; } = "sy挂神";
         public string Room { get; set; } = "162474";
 
         public bool ShowBrand { get; set; } = false;
         public bool ShowGrade { get; set; } = false;
-        public bool ShowChar { get; set; } = true;
+        public bool ShowChat { get; set; } = true;
         public bool ShowPresent { get; set; } = true;
         public bool ShowLike { get; set; } = true;
         public bool DanMu { get; set; } = true;
-        public bool JoinRoom { get; set; } = false;
-        public bool ShowFollow { get; set; } = true;
+        //public bool JoinRoom { get; set; } = false;
+        //public bool ShowFollow { get; set; } = true;
 
         public int spd = 5, pit = 5, vol = 1, per = 4;
 
-        public bool canUpdate = true;
+        public bool CanUpdate = true;
 
         public bool DeBug { get; set; } = false;
+        public string BlackList = "";
     }
 }
