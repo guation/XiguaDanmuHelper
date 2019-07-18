@@ -62,8 +62,8 @@ namespace XiguaDanmakuHelper
     }
     public class ConfigData
     {
-        public string RoomID { get; } = "162474";
-        public string UserName { get; } = "sy挂神";
+        public string RoomID { get; set; } = "162474";
+        public string UserName { get; set; } = "sy挂神";
         public string Room { get; set; } = "162474";
 
         public bool ShowBrand { get; set; } = false;

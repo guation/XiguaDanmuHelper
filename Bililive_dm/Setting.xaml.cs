@@ -56,7 +56,7 @@ namespace Bililive_dm
             }
             if (configData.BlackList == "")
             {
-                textboxHasText = false;
+                Textbox.Text = "需要屏蔽的内容，以|为分割";
             }
             else
             {
@@ -70,7 +70,8 @@ namespace Bililive_dm
         private void Textbox_Enter(object sender, EventArgs e)
         {
             if (textboxHasText == false) Textbox.Text = "";
-        }        //textbox失去焦点        
+        }
+        //textbox失去焦点        
         private void Textbox_Leave(object sender, EventArgs e)
         {
             if (Textbox.Text == "")
@@ -126,9 +127,10 @@ namespace Bililive_dm
             if (isInt) configData.per = 4;
         }
 
-        private void TextChanged(object sender, TextChangedEventArgs e)
+        private void Clossing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (textboxHasText) configData.BlackList = Textbox.Text.ToLower();
+            if (textboxHasText) configData.BlackList = Textbox.Text;
+            else configData.BlackList = "";
         }
     }
 }

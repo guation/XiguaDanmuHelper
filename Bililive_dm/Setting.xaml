@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Bililive_dm"
         mc:Ignorable="d"
-        Title="全局设置" Height="220" Width="500 " ResizeMode="NoResize">
+        Title="全局设置" Height="220" Width="500 " ResizeMode="NoResize" Closing="Clossing">
     <StackPanel>
         <DockPanel Height="25">
             <TextBlock TextWrapping="Wrap" Text="弹幕朗读语速" VerticalAlignment="Center" Width="80" TextAlignment="Right"
@@ -44,7 +44,7 @@
         <DockPanel Height="25">
             <TextBlock  TextWrapping="Wrap" Text="朗读屏蔽词" VerticalAlignment="Center" Width="80" TextAlignment="Right"
                        Margin="0,0,20,0" Height="25" />
-            <TextBox x:Name="Textbox" Text="需要屏蔽的内容，以|为分割" MouseEnter="Textbox_Enter" MouseLeave="Textbox_Leave" FontSize="14" VerticalContentAlignment="Stretch" Height="25" VerticalAlignment="Top" TextChanged="TextChanged"/>
+            <TextBox x:Name="Textbox" MouseEnter="Textbox_Enter" MouseLeave="Textbox_Leave" FontSize="14" VerticalContentAlignment="Stretch" Height="25" VerticalAlignment="Top"/>
 
         </DockPanel>
         <StackPanel DockPanel.Dock="Top">

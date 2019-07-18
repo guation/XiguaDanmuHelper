@@ -237,6 +237,7 @@ namespace Bililive_dm
 
         private void MainWindow_Closed(object sender, EventArgs e)
         {
+            ConfigData.Room = LiverName.Text.Trim();
             Config.Write(ConfigData);
         }
 
@@ -285,8 +286,8 @@ namespace Bililive_dm
 
         private async void connbtn_Click(object sender, RoutedEventArgs e)
         {
+            ConfigData.Room = Name = LiverName.Text.Trim();
             Config.Write(ConfigData);
-            Name = LiverName.Text.Trim();
             b = new Api(Name);
 
             ConnBtn.IsEnabled = false;
