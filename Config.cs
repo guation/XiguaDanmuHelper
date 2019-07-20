@@ -2,13 +2,12 @@
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using Newtonsoft.Json.Linq;
 
 namespace XiguaDanmakuHelper
 {
     public class Config
     {
-        public static string Read(string path="Config.json")
+        public static string Read(string path = "Config.json")
         {
             string data = "";
             try
@@ -25,10 +24,10 @@ namespace XiguaDanmakuHelper
             {
                 data = e.ToString();
             }
-            
+
             return data;
         }
-        public static bool Write(string str , string path="Config.json")
+        public static bool Write(string str, string path = "Config.json")
         {
             try
             {
@@ -45,9 +44,9 @@ namespace XiguaDanmakuHelper
                 return false;
             }
         }
-        public static bool Write(object obj , string path = "Config.json")
+        public static bool Write(object obj, string path = "Config.json")
         {
-            return Write(getJsonByObject(obj),path);
+            return Write(getJsonByObject(obj), path);
         }
         public static string getJsonByObject(object obj)
         {

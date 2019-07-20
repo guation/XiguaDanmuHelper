@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:bililiveDm="clr-namespace:Bililive_dm"
         xmlns:local="clr-namespace:Bililive_dm"
         mc:Ignorable="d"
         Title="全局设置" Height="220" Width="500 " ResizeMode="NoResize" Closing="Clossing">
@@ -44,7 +45,7 @@
         <DockPanel Height="25">
             <TextBlock  TextWrapping="Wrap" Text="朗读屏蔽词" VerticalAlignment="Center" Width="80" TextAlignment="Right"
                        Margin="0,0,20,0" Height="25" />
-            <TextBox x:Name="Textbox" MouseEnter="Textbox_Enter" MouseLeave="Textbox_Leave" FontSize="14" VerticalContentAlignment="Stretch" Height="25" VerticalAlignment="Top"/>
+            <TextBox x:Name="Textbox" FontSize="14" VerticalContentAlignment="Stretch" Height="25" VerticalAlignment="Top" ToolTip="需要屏蔽的内容，以|为分割"/>
 
         </DockPanel>
         <StackPanel DockPanel.Dock="Top">

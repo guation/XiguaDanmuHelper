@@ -126,7 +126,7 @@ namespace XiguaDanmakuHelper
                         if (_j["cells"].Any())
                         {
                             isValidRoom = true;
-                            
+
                             try
                             {
                                 isLive = (bool)_j["cells"][0]["anchor"]["user_info"]["is_living"];
@@ -219,12 +219,12 @@ namespace XiguaDanmakuHelper
                                 RoomID = (int)_j["cells"][0]["anchor"]["room_id"];
                                 liverName = (new User((JObject)_j["cells"][0])).ToString();
                             }
-                            catch(Exception err)
+                            catch (Exception err)
                             {
                                 LogMessage?.Invoke(err.ToString());
                                 return false;
                             }
-                            
+
                         }
                         else
                         {

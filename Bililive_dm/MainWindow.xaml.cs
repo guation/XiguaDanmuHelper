@@ -6,7 +6,6 @@ using System.IO;
 using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -160,6 +159,12 @@ namespace Bililive_dm
                 logging("配置文件损坏或不存在，已生成新的配置文件。");
                 ConfigData = new ConfigData();
                 Config.Write(ConfigData);
+                showBrand.IsChecked = ConfigData.ShowBrand;
+                showGrade.IsChecked = ConfigData.ShowGrade;
+                showChat.IsChecked = ConfigData.ShowChat;
+                showPresent.IsChecked = ConfigData.ShowPresent;
+                showLike.IsChecked = ConfigData.ShowLike;
+                danMu.IsChecked = ConfigData.DanMu;
             }
             new Thread(() =>
             {
@@ -187,7 +192,7 @@ namespace Bililive_dm
                             }
                         }
                     }
-                    if(json["msg"].ToString()!="") logging("公告：" + json["msg"].ToString());
+                    if (json["msg"].ToString() != "") logging("公告：" + json["msg"].ToString());
                 }
                 catch (Exception)
                 {
@@ -398,24 +403,25 @@ namespace Bililive_dm
             }
         }
 
-        public void logging(string text , string level = "info")
+        public void logging(string text, string level = "info")
         {
             if (Log.Dispatcher.CheckAccess())
                 lock (_messageQueue)
                 {
+                    var time = DateTime.Now.ToString("T");
                     if (_messageQueue.Count >= _maxCapacity) _messageQueue.RemoveAt(0);
-                    if(level == "debug" && ConfigData.DeBug)
+                    if (level == "debug" && ConfigData.DeBug)
                     {
-                        _messageQueue.Add("[" + DateTime.Now.ToString("T") + "][debug]" + text);
+                        _messageQueue.Add($"[{time}][debug]{text}");
                     }
-                    else if(level == "info")
+                    else if (level == "info")
                     {
-                        _messageQueue.Add("[" + DateTime.Now.ToString("T") + "]" + text);
+                        _messageQueue.Add($"[{time}]{text}");
                     }
-                    Logger.SaveLog("[" + DateTime.Now.ToString("T") + "]" + text , level);
+                    Logger.SaveLog($"[{time}]{text}", level);
                 }
             else
-                Log.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => logging(text ,level)));
+                Log.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => logging(text, level)));
         }
 
         public void AddDMText(string notify, string text, bool warn = false)
@@ -472,7 +478,6 @@ namespace Bililive_dm
         public void Test_OnClick(object sender, RoutedEventArgs e)
         {
             AddDMText("提示", "這是一個測試😀😭", true);
-            logging("debug", "debug");
         }
 
         private void Setting_OnClick(object sender, RoutedEventArgs e)
@@ -548,14 +553,15 @@ namespace Bililive_dm
             {
                 while (true)
                 {
-                    if (abc[2] > 0) {
+                    if (abc[2] > 0)
+                    {
                         mp3Player.AutoPlay("tmp/" + abc[1] + ".mp3");
                         abc[1]++;
                         abc[2]--;
                     }
                     if (abc[2] > 10)
                     {
-                        abc[1] = abc[0]-1;
+                        abc[1] = abc[0] - 1;
                         abc[2] = 1;//朗读最后一条弹幕
                         logging("弹幕缓存上限已跳过朗读部分弹幕。");
                     }
@@ -632,7 +638,7 @@ namespace Bililive_dm
 
         private void showBrand_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            ConfigData.ShowBrand =  User.showBrand = false;
+            ConfigData.ShowBrand = User.showBrand = false;
             Config.Write(ConfigData);
         }
         private void showGrade_OnChecked(object sender, RoutedEventArgs e)

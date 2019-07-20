@@ -8,14 +8,14 @@ namespace XiguaDanmakuHelper
 {
     public class Common
     {
-        public static string HttpGet(string url,bool ua=false)
+        public static string HttpGet(string url, bool ua = false)
         {
             HttpWebRequest myRequest = null;
             HttpWebResponse myHttpResponse = null;
-            myRequest = (HttpWebRequest) WebRequest.Create(url);
+            myRequest = (HttpWebRequest)WebRequest.Create(url);
             myRequest.Method = "GET";
             if (ua) myRequest.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
-            myHttpResponse = (HttpWebResponse) myRequest.GetResponse();
+            myHttpResponse = (HttpWebResponse)myRequest.GetResponse();
             var reader = new StreamReader(myHttpResponse.GetResponseStream());
             var json = reader.ReadToEnd();
             reader.Close();
@@ -25,7 +25,7 @@ namespace XiguaDanmakuHelper
 
         public static string HttpPost(string url, string data)
         {
-            var myRequest = (HttpWebRequest) WebRequest.Create(url);
+            var myRequest = (HttpWebRequest)WebRequest.Create(url);
             byte[] ba = Encoding.Default.GetBytes(data);
             myRequest.Method = "POST";
             myRequest.ContentType = "application/x-www-form-urlencoded; charset=UTF-8";
@@ -34,7 +34,7 @@ namespace XiguaDanmakuHelper
             pStream.Write(ba, 0, ba.Length);
             pStream.Close();
 
-            var myHttpResponse = (HttpWebResponse) myRequest.GetResponse();
+            var myHttpResponse = (HttpWebResponse)myRequest.GetResponse();
             var reader = new StreamReader(myHttpResponse.GetResponseStream());
             var json = reader.ReadToEnd();
             reader.Close();
@@ -44,7 +44,7 @@ namespace XiguaDanmakuHelper
 
         public static async Task<string> HttpGetAsync(string url)
         {
-            var request =  WebRequest.Create(url);
+            var request = WebRequest.Create(url);
             request.Method = "GET";
             var response = request.GetResponse();
             using (var stream = response.GetResponseStream())
