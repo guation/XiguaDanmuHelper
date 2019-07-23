@@ -42,6 +42,7 @@ namespace Bililive_dm
                     break;
             }
             Textbox.Text = configData.BlackList;
+            slider0.Value = configData.maxCapacity;
             isInt = true;
         }
 
@@ -55,9 +56,14 @@ namespace Bililive_dm
             MessageBox.Show("    欢迎使用西瓜直非官方助手。\n    本软件（当前分支）目前由挂神个人维护。\n    软件在使用过程出现问题可与挂神联系，如果您觉得此软件对您有帮助也可以考虑赞助本软件的开发。\n    本软件完全开源，项目地址：https://github.com/guation/XiguaDanmuHelper \n    您可以在不违反协议的情况下自行进行二次开发。", "关于本软件");
         }
 
+        private void Slider0_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (isInt) configData.maxCapacity = (int)slider0.Value;
+        }
+
         private void Slider1_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if(isInt) configData.spd = (int)slider1.Value;
+            if (isInt) configData.spd = (int)slider1.Value;
         }
 
         private void Slider2_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -69,6 +75,7 @@ namespace Bililive_dm
         {
             if (isInt) configData.vol = (int)slider3.Value;
         }
+
 
         private void RadioButton1_Checked(object sender, RoutedEventArgs e)
         {

@@ -108,7 +108,7 @@ namespace XiguaDanmakuHelper
                 System.IO.File.Move(tempFile, path);
                 return true;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }

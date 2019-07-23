@@ -27,7 +27,6 @@ namespace Bililive_dm
     {
         private const int WS_EX_TRANSPARENT = 0x20;
         private const int GWL_EXSTYLE = -20;
-        private const int _maxCapacity = 100;
         private uint[] abc = { 0, 0, 0 };
 
         private readonly Queue<MessageModel> _danmakuQueue = new Queue<MessageModel>();
@@ -155,6 +154,7 @@ namespace Bililive_dm
                 ConfigData.CanUpdate = (bool)j["CanUpdate"];
                 ConfigData.DeBug = (bool)j["DeBug"];
                 ConfigData.BlackList = (string)j["BlackList"];
+                ConfigData.maxCapacity = (int)j["maxCapacity"];
 
             }
             catch
@@ -169,6 +169,7 @@ namespace Bililive_dm
                 showLike.IsChecked = ConfigData.ShowLike;
                 danMu.IsChecked = ConfigData.DanMu;
             }
+            BlackList = ConfigData.BlackList.Split('|');
             new Thread(() =>
             {
                 try
@@ -412,7 +413,7 @@ namespace Bililive_dm
                 lock (_messageQueue)
                 {
                     var time = DateTime.Now.ToString("T");
-                    if (_messageQueue.Count >= _maxCapacity) _messageQueue.RemoveAt(0);
+                    while (_messageQueue.Count >= ConfigData.maxCapacity) _messageQueue.RemoveAt(0);
                     if (level == "debug" && ConfigData.DeBug)
                     {
                         _messageQueue.Add($"[{time}][debug]{text}");
@@ -547,7 +548,15 @@ namespace Bililive_dm
                     foreach (var Black in BlackList)
                     {
                         var black = Black.Trim();
-                        if(Regex.IsMatch(wenzi,black)) return;
+                        try
+                        {
+                            if (Regex.IsMatch(wenzi, black)) return;
+                        }
+                        catch(Exception err)
+                        {
+                            logging(err.ToString(),"debug");
+                        }
+                        
                     }
                 }
                 var url = $"http://vps.guation.cn:8080/?msg={wenzi}&spd={ConfigData.spd}&pit={ConfigData.pit}&vol={ConfigData.vol}&per={ConfigData.per}";

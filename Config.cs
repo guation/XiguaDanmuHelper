@@ -13,8 +13,8 @@ namespace XiguaDanmakuHelper
             try
             {
                 StreamReader sr = new StreamReader(path, UTF8Encoding.Default);
-                String line;
-                while ((line = sr.ReadLine()) != null)
+                string line;
+                if ((line = sr.ReadLine()) != null)//只读取一行，多行用while
                 {
                     data += line.ToString();
                 }
@@ -33,7 +33,7 @@ namespace XiguaDanmakuHelper
             {
                 //FileMode.Append为不覆盖文件效果.create为覆盖
                 FileStream fs = new FileStream(path, FileMode.Create);
-                byte[] data = System.Text.UTF8Encoding.Default.GetBytes(str);
+                byte[] data = System.Text.UTF8Encoding.Default.GetBytes(str + "\n//修改配置文件可能导致程序异常退出，若程序多次异常退出可尝试删除此文件");
                 fs.Write(data, 0, data.Length);
                 fs.Flush();
                 fs.Close();
@@ -80,6 +80,7 @@ namespace XiguaDanmakuHelper
 
         public bool DeBug { get; set; } = false;
         public string BlackList = "";
+        public int maxCapacity = 100;
 
         public override string ToString()
         {
