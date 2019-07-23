@@ -21,11 +21,11 @@ namespace XiguaDanmakuHelper
         protected string cursor = "0";
         public bool isLive = false;
         public bool isValidRoom = false;
-        private long RoomID = 0;
+        public long RoomID = 0;
         public string Title = "";
         public User user;
-        private string liverName;
-        private bool isRoomID = false;
+        public string liverName;
+        public bool isRoomID = false;
 
         public Api()
         {
@@ -35,7 +35,7 @@ namespace XiguaDanmakuHelper
         public Api(string name)
         {
             liverName = name;
-            isRoomID = int.TryParse(liverName, out _);
+            isRoomID = long.TryParse(liverName, out _);
         }
 
         public static event WhenMessage OnMessage;
@@ -46,10 +46,13 @@ namespace XiguaDanmakuHelper
 
         public async Task<bool> ConnectAsync()
         {
-            await UpdateRoomInfoAsync();
+            if (isRoomID)
+                UpdateRoomInfoWeb();
+            else
+                await UpdateRoomInfoAsync();
             if (!isValidRoom)
             {
-                LogMessage?.Invoke("请确认输入的用户名是否正确");
+                LogMessage?.Invoke("请确认输入的用户名/房间号是否正确");
                 return false;
             }
 
@@ -243,11 +246,50 @@ namespace XiguaDanmakuHelper
             }
         }
 
+        public bool UpdateRoomInfoWeb()
+        {
+            isLive = true;
+            var url = $"https://live.ixigua.com/{liverName}";
+            string _text;
+            try
+            {
+                _text = Common.HttpGet(url, true);
+            }
+            catch (WebException)
+            {
+                LogMessage?.Invoke("网络错误");
+                isValidRoom = false;
+                return false;
+            }
+            //LogMessage?.Invoke(_text);
+            try
+            {
+                string[] data1 = _text.Split(new String[] { "id=\"SSR_HYDRATED_DATA\">" }, StringSplitOptions.RemoveEmptyEntries);
+                string[] data2 = data1[1].Split(new String[] { "</script>" }, StringSplitOptions.RemoveEmptyEntries);
+                var j = JObject.Parse(data2[0]);
+                if (j["roomData"] != null)
+                {
+                    isValidRoom = true;
+                    RoomID = (long)j["roomData"]["id"];
+                }
+            }
+            catch (Exception)
+            {
+                LogMessage?.Invoke("出现故障");
+                isValidRoom = false;
+                isLive = false;
+            }
+            return true;
+        }
+
         public void GetDanmaku()
         {
             if (!isValidRoom)
             {
-                UpdateRoomInfo();
+                if (isRoomID)
+                    UpdateRoomInfoWeb();
+                else
+                    UpdateRoomInfo();
                 return;
             }
 
@@ -275,7 +317,10 @@ namespace XiguaDanmakuHelper
             cursor = (string)j["extra"]["cursor"];
             if (j["data"] is null)
             {
-                UpdateRoomInfo();
+                if (isRoomID)
+                    UpdateRoomInfoWeb();
+                else
+                    UpdateRoomInfo();
                 return;
             }
 
@@ -309,7 +354,10 @@ namespace XiguaDanmakuHelper
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Join, new User((JObject)m)));
                         break;
                     case "VideoLiveControlMessage":
-                        UpdateRoomInfo();
+                        if (isRoomID)
+                            UpdateRoomInfoWeb();
+                        else
+                            UpdateRoomInfo();
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Leave));
                         break;
                     case "VideoLiveDiggMessage":

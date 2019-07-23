@@ -38,10 +38,18 @@ namespace XiguaDanmakuHelper
             }
         }
 
-        private void UpdateGiftList()
+        private static void UpdateGiftList()
         {
-            GiftList = new Dictionary<long, string>();
-            GiftList.Add(10001, "西瓜");
+            //GiftList = new Dictionary<long, string>();
+            //GiftList.Add(10001, "西瓜");
+            if (GiftList.ContainsKey(10001))
+            {
+                GiftList[10001] = "西瓜";
+            }
+            else
+            {
+                GiftList.Add(10001, "西瓜");
+            }
             var _text = Common.HttpGet($"https://i.snssdk.com/videolive/gift/get_gift_list?room_id={RoomID}&version_code=730&device_platform=android");
             var j = JObject.Parse(_text);
             if (j["gift_info"].Any())

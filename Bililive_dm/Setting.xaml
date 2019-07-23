@@ -6,7 +6,7 @@
         xmlns:bililiveDm="clr-namespace:Bililive_dm"
         xmlns:local="clr-namespace:Bililive_dm"
         mc:Ignorable="d"
-        Title="全局设置" Height="242" Width="500 " ResizeMode="NoResize" Closing="Clossing">
+        Title="全局设置" Height="273" Width="500 " ResizeMode="NoResize" Closing="Clossing">
     <StackPanel>
         <DockPanel Height="25">
             <TextBlock TextWrapping="Wrap" Text="日志缓存上限" VerticalAlignment="Center" Width="80" TextAlignment="Right"
@@ -57,8 +57,9 @@
 
         </DockPanel>
         <StackPanel DockPanel.Dock="Top">
-            <Button Content="关闭窗口" Height="30" Click="Button_Click_3"/>
-            <Button Content="关于程序" Height="30" Click="Button_Click_4"/>
+            <Button Content="关闭窗口" Height="30" Click="Button_Click_1"/>
+            <Button Content="关于程序" Height="30" Click="Button_Click_2"/>
+            <Button Content="用户反馈" Height="30" Click="Button_Click_3"/>
         </StackPanel>
 
     </StackPanel>

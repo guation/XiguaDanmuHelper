@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.VisualBasic;
 using XiguaDanmakuHelper;
 
 namespace Bililive_dm
@@ -46,16 +47,20 @@ namespace Bililive_dm
             isInt = true;
         }
 
-        private void Button_Click_3(object sender, RoutedEventArgs e)
+        private void Button_Click_1(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
-        private void Button_Click_4(object sender, RoutedEventArgs e)
+        private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("    欢迎使用西瓜直非官方助手。\n    本软件（当前分支）目前由挂神个人维护。\n    软件在使用过程出现问题可与挂神联系，如果您觉得此软件对您有帮助也可以考虑赞助本软件的开发。\n    本软件完全开源，项目地址：https://github.com/guation/XiguaDanmuHelper \n    您可以在不违反协议的情况下自行进行二次开发。", "关于本软件");
+            MessageBox.Show("    欢迎使用西瓜直非官方助手。\n    本软件原作者 q792602257 ，当前分支由 挂神 维护。\n    软件在使用过程出现问题可与挂神联系（哔哩哔哩@I挂神I 西瓜视频@sy挂神 GitHub@guation），如果您觉得此软件对您有帮助也可以考虑赞助本软件的开发，挂神的QQ群：291283968，挂神的QQ：1853306918。\n    本软件完全开源，项目地址：https://github.com/guation/XiguaDanmuHelper \n    您可以在不违反协议的情况下自行进行二次开发。", "关于本软件");
         }
 
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            string str = Interaction.InputBox("用户反馈暂未开放", "用户反馈", null, -1, -1);
+        }
         private void Slider0_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (isInt) configData.maxCapacity = (int)slider0.Value;

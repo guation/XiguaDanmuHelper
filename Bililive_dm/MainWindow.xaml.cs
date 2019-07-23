@@ -46,7 +46,7 @@ namespace Bililive_dm
 
         private StoreModel settings;
 
-        private readonly string version = "2.2.0.6";
+        private readonly string version = "2.2.0.9";
 
         public ConfigData ConfigData = new ConfigData();
         public Logger Logger = new Logger();
@@ -295,9 +295,11 @@ namespace Bililive_dm
 
         private async void connbtn_Click(object sender, RoutedEventArgs e)
         {
-            ConfigData.Room = Name = LiverName.Text.Trim();
+            ConfigData.Room = LiverName.Text.Trim();
             Config.Write(ConfigData);
-            b = new Api(Name);
+            b = new Api(ConfigData.Room);
+
+            logging("是否为房间号" + b.isRoomID.ToString(),"debug");
 
             ConnBtn.IsEnabled = false;
             DisconnBtn.IsEnabled = false;
@@ -309,6 +311,7 @@ namespace Bililive_dm
                 logging("連接成功");
                 AddDMText("提示", "連接成功", true);
                 getDanmakuThread.Start();
+                logging(b.RoomID.ToString(),"debug");
             }
             else
             {
@@ -316,8 +319,10 @@ namespace Bililive_dm
                 AddDMText("提示", "連接失敗", true);
                 ConnBtn.IsEnabled = true;
             }
-
-            LiverName.Text = b.user.ToString();
+            if (b.isRoomID)
+                LiverName.Text = b.liverName.ToString();
+            else
+                LiverName.Text = b.user.ToString();
             DisconnBtn.IsEnabled = true;
         }
 
@@ -353,12 +358,12 @@ namespace Bililive_dm
                     if (ConfigData.ShowChat)
                     {
                         logging(danmakuModel.ChatModel.ToString());
-                        Hecheng(danmakuModel.ChatModel.content);
+                        Hecheng(DelEmoji.delEmoji(danmakuModel.ChatModel.content));
+                        //经过多次测试发现弹幕中部分emoji不能被弹幕合成程序处理而导致主线程阻塞引发程序崩溃
+                        //即使未引发崩溃也会导致程序不能继续正常工作出现假死状态
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            AddDMText(danmakuModel.ChatModel.user, DelEmoji.delEmoji(danmakuModel.ChatModel.content));
-                            //经过多次测试发现弹幕中部分emoji不能被弹幕弹窗程序处理而导致主线程阻塞引发程序崩溃
-                            //即使未引发崩溃也会导致程序不能继续正常工作出现假死状态
+                            AddDMText(danmakuModel.ChatModel.user, danmakuModel.ChatModel.content);
                         }));
                     }
                     break;
