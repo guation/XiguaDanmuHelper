@@ -359,7 +359,7 @@ namespace Bililive_dm
                     {
                         logging(danmakuModel.ChatModel.ToString());
                         Hecheng(DelEmoji.delEmoji(danmakuModel.ChatModel.content));
-                        //经过多次测试发现弹幕中部分emoji不能被弹幕合成程序处理而导致主线程阻塞引发程序崩溃
+                        //经过多次测试发现弹幕中部分emoji不能被语音合成程序处理而导致主线程阻塞引发程序崩溃
                         //即使未引发崩溃也会导致程序不能继续正常工作出现假死状态
                         Dispatcher.BeginInvoke(new Action(() =>
                         {

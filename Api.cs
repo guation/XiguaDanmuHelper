@@ -188,7 +188,10 @@ namespace XiguaDanmakuHelper
                 Title = (string)j["data"]["title"];
                 RoomID = (long)j["data"]["id"];
                 user = new User(j);
-
+                if (isLive && (int)j["room"]?["status"] != 2)
+                {
+                    OnLeave?.Invoke();
+                }
                 isLive = (int)j["room"]?["status"] == 2;
                 return true;
             }
