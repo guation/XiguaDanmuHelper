@@ -41,6 +41,7 @@ namespace Bililive_dm
                     RadioButton4.IsChecked = true;
                     break;
             }
+            Textbox.Text = configData.BlackList;
             isInt = true;
         }
 

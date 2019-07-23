@@ -80,5 +80,10 @@ namespace XiguaDanmakuHelper
 
         public bool DeBug { get; set; } = false;
         public string BlackList = "";
+
+        public override string ToString()
+        {
+            return Config.getJsonByObject(this);
+        }
     }
 }

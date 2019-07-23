@@ -6,6 +6,7 @@ using System.IO;
 using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -50,6 +51,8 @@ namespace Bililive_dm
 
         public ConfigData ConfigData = new ConfigData();
         public Logger Logger = new Logger();
+
+        public string[] BlackList;
 
         public MainWindow()
         {
@@ -483,9 +486,11 @@ namespace Bililive_dm
         private void Setting_OnClick(object sender, RoutedEventArgs e)
         {
             Setting setting = new Setting();
-            Setting.GetConfig += GetConfig;
-            Setting.SetConfig += SetConfig;
+            //Setting.GetConfig += GetConfig;
+            //Setting.SetConfig += SetConfig;
             setting.ShowDialog();
+            if (ConfigData.BlackList != "") BlackList = ConfigData.BlackList.Split('|');
+                
         }
         private void OnLiveStop()
         {
@@ -537,6 +542,14 @@ namespace Bililive_dm
         {
             if (ConfigData.DanMu)
             {
+                if (ConfigData.BlackList != "")
+                {
+                    foreach (var Black in BlackList)
+                    {
+                        var black = Black.Trim();
+                        if(Regex.IsMatch(wenzi,black)) return;
+                    }
+                }
                 var url = $"http://vps.guation.cn:8080/?msg={wenzi}&spd={ConfigData.spd}&pit={ConfigData.pit}&vol={ConfigData.vol}&per={ConfigData.per}";
                 if (Common.HttpDownload(url, "tmp/" + abc[0] + ".mp3"))
                 {

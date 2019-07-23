@@ -25,6 +25,7 @@ namespace XiguaDanmakuHelper
         public string Title = "";
         public User user;
         private string liverName;
+        private bool isRoomID = false;
 
         public Api()
         {
@@ -34,6 +35,7 @@ namespace XiguaDanmakuHelper
         public Api(string name)
         {
             liverName = name;
+            isRoomID = int.TryParse(liverName, out _);
         }
 
         public static event WhenMessage OnMessage;
