@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Management;
+using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.VisualBasic;
@@ -54,12 +57,35 @@ namespace Bililive_dm
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("    欢迎使用西瓜直非官方助手。\n    本软件原作者 q792602257 ，当前分支由 挂神 维护。\n    软件在使用过程出现问题可与挂神联系（哔哩哔哩@I挂神I 西瓜视频@sy挂神 GitHub@guation），如果您觉得此软件对您有帮助也可以考虑赞助本软件的开发，挂神的QQ群：291283968，挂神的QQ：1853306918。\n    本软件完全开源，项目地址：https://github.com/guation/XiguaDanmuHelper \n    您可以在不违反协议的情况下自行进行二次开发。", "关于本软件");
+            MessageBox.Show("    欢迎使用西瓜直非官方助手。\n    本软件原作者 q792602257 ，当前分支由 挂神 维护。\n    软件在使用过程出现问题可通过“用户反馈”或以下方式联系挂神：哔哩哔哩@I挂神I、西瓜视频@sy挂神、GitHub@guation。\n   如果您觉得此软件对您有帮助也可以考虑赞助本软件的开发，挂神的QQ群：291283968，挂神的QQ：1853306918。\n    本软件完全开源，项目地址：https://github.com/guation/XiguaDanmuHelper \n    您可以在不违反协议的情况下自行进行二次开发。", "关于本软件");
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            string str = Interaction.InputBox("用户反馈暂未开放", "用户反馈", null, -1, -1);
+            string msg = Interaction.InputBox("输入您的反馈内容，点击确认提交。注意：我们将会收集您的机器码一并提交，机器码仅做识别用户依据不包含您的隐私信息。", "用户反馈", null, -1, -1);
+            string data;
+            if (msg == "") return;
+            try
+            {
+                string cpuInfo = " ";
+                using (ManagementClass cimobject = new ManagementClass("Win32_Processor"))
+                {
+                    ManagementObjectCollection moc = cimobject.GetInstances();
+
+                    foreach (ManagementObject mo in moc)
+                    {
+                        cpuInfo = mo.Properties["ProcessorId"].Value.ToString();
+                        mo.Dispose();
+                    }
+                }
+                string str = "{" + $"\"msg\": \"{msg}\" , \"cpuInfo\": \"{cpuInfo}\" , \"Room\": \"{configData.Room}\""  + "}";
+                data = Common.HttpPost("http://127.0.0.1:8080/Feedback", str);
+            }
+            catch(Exception err)
+            {
+                data = "用户反馈发生了错误，请稍后再试。"+err.ToString();
+            }
+            MessageBox.Show(data, "用户反馈");
         }
         private void Slider0_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {

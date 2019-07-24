@@ -9,12 +9,12 @@
         Title="全局设置" Height="273" Width="500 " ResizeMode="NoResize" Closing="Clossing">
     <StackPanel>
         <DockPanel Height="25">
-            <TextBlock TextWrapping="Wrap" Text="日志缓存上限" VerticalAlignment="Center" Width="80" TextAlignment="Right"
-                       Margin="0,0,20,0" Height="25" />
+            <TextBlock TextWrapping="Wrap" Text="朗读缓存上限" VerticalAlignment="Center" Width="80" TextAlignment="Right"
+                       Margin="0,0,20,0" Height="25" ToolTip="设置弹幕朗读的缓存上限，当缓存超过上限时将自动跳过朗读部分弹幕" />
             <TextBox TextWrapping="Wrap" DockPanel.Dock="Right" VerticalAlignment="Center" Width="70" Margin="38,0,0,0"
                      Text="{Binding Value, ElementName=slider0}" HorizontalContentAlignment="Center" IsEnabled="False" />
-            <Slider x:Name="slider0" Style="{DynamicResource SimpleSlider}" Maximum="999" Minimum="10"
-                    Value="100" IsSnapToTickEnabled="True" ValueChanged="Slider0_ValueChanged" ToolTip="选中游标之后按左右方向键可以微调数值"/>
+            <Slider x:Name="slider0" Style="{DynamicResource SimpleSlider}" Maximum="50" Minimum="5"
+                    Value="10" IsSnapToTickEnabled="True" ValueChanged="Slider0_ValueChanged" ToolTip="选中游标之后按左右方向键可以微调数值"/>
         </DockPanel>
         <DockPanel Height="25">
             <TextBlock TextWrapping="Wrap" Text="弹幕朗读语速" VerticalAlignment="Center" Width="80" TextAlignment="Right"

@@ -95,6 +95,7 @@ namespace XiguaDanmakuHelper
                 //发送请求并获取相应回应数据
                 HttpWebResponse response = request.GetResponse() as HttpWebResponse;
                 //直到request.GetResponse()程序才开始向目标网页发送Post请求
+                if (response.StatusCode != HttpStatusCode.OK) return false;
                 Stream responseStream = response.GetResponseStream();
                 byte[] bArr = new byte[1024];
                 int size = responseStream.Read(bArr, 0, (int)bArr.Length);

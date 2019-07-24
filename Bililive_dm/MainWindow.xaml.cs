@@ -60,7 +60,7 @@ namespace Bililive_dm
 
             Info.Text += version;
             //初始化日志
-            LiverName.Text = "挂神";
+            //LiverName.Text = "挂神";
             b = new Api();
             overlay_enabled = true;
             OpenOverlay();
@@ -162,6 +162,7 @@ namespace Bililive_dm
                 logging("配置文件损坏或不存在，已生成新的配置文件。");
                 ConfigData = new ConfigData();
                 Config.Write(ConfigData);
+                LiverName.Text = ConfigData.Room;
                 showBrand.IsChecked = ConfigData.ShowBrand;
                 showGrade.IsChecked = ConfigData.ShowGrade;
                 showChat.IsChecked = ConfigData.ShowChat;
@@ -358,7 +359,7 @@ namespace Bililive_dm
                     if (ConfigData.ShowChat)
                     {
                         logging(danmakuModel.ChatModel.ToString());
-                        Hecheng(DelEmoji.delEmoji(danmakuModel.ChatModel.content));
+                        Hecheng(DelEmoji.filterEmoji(danmakuModel.ChatModel.content));
                         //经过多次测试发现弹幕中部分emoji不能被语音合成程序处理而导致主线程阻塞引发程序崩溃
                         //即使未引发崩溃也会导致程序不能继续正常工作出现假死状态
                         Dispatcher.BeginInvoke(new Action(() =>
@@ -418,7 +419,7 @@ namespace Bililive_dm
                 lock (_messageQueue)
                 {
                     var time = DateTime.Now.ToString("T");
-                    while (_messageQueue.Count >= ConfigData.maxCapacity) _messageQueue.RemoveAt(0);
+                    while (_messageQueue.Count >= 100) _messageQueue.RemoveAt(0);
                     if (level == "debug" && ConfigData.DeBug)
                     {
                         _messageQueue.Add($"[{time}][debug]{text}");
@@ -495,6 +496,7 @@ namespace Bililive_dm
             //Setting.GetConfig += GetConfig;
             //Setting.SetConfig += SetConfig;
             setting.ShowDialog();
+            ConfigData.Room = LiverName.Text.Trim();
             if (ConfigData.BlackList != "") BlackList = ConfigData.BlackList.Split('|');
                 
         }
@@ -586,7 +588,7 @@ namespace Bililive_dm
                         abc[1]++;
                         abc[2]--;
                     }
-                    if (abc[2] > 10)
+                    if (abc[2] > ConfigData.maxCapacity)
                     {
                         abc[1] = abc[0] - 1;
                         abc[2] = 1;//朗读最后一条弹幕
@@ -666,7 +668,6 @@ namespace Bililive_dm
         private void showBrand_OnUnchecked(object sender, RoutedEventArgs e)
         {
             ConfigData.ShowBrand = User.showBrand = false;
-            Config.Write(ConfigData);
         }
         private void showGrade_OnChecked(object sender, RoutedEventArgs e)
         {
