@@ -8,7 +8,7 @@ namespace XiguaDanmakuHelper
 {
     public class Api
     {
-        public delegate void Log(string msg);
+        public delegate void Log(string msg, string level = "info");
 
         public delegate void RoomCounting(long popularity);
 
@@ -276,11 +276,13 @@ namespace XiguaDanmakuHelper
                     RoomID = (long)j["roomData"]["id"];
                 }
             }
-            catch (Exception)
+            catch (Exception err)
             {
                 LogMessage?.Invoke("出现故障");
+                LogMessage?.Invoke(err.ToString(), "debug");
                 isValidRoom = false;
                 isLive = false;
+                return false;
             }
             return true;
         }
@@ -312,7 +314,7 @@ namespace XiguaDanmakuHelper
             var j = JObject.Parse(_text);
             if (j["extra"]?["cursor"] is null)
             {
-                LogMessage?.Invoke("cursor 数据结构改变，请与我联系");
+                LogMessage?.Invoke("cursor 数据结构改变，请与作者联系");
                 Console.Read();
                 return;
             }
@@ -342,21 +344,24 @@ namespace XiguaDanmakuHelper
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Ad, (JObject)m));
                         break;
                     case "VideoLiveChatMessage":
+                    case "VideoLiveDanmakuMessage":
                         OnMessage?.Invoke(new MessageModel(new Chat((JObject)m)));
                         break;
                     case "VideoLiveMemberMessage":
                         _updateRoomInfo((JObject)m);
-                        //                        OnEnter?.Invoke(new Gift((JObject)m));
-                        //                        OnMessage?.Invoke(new MessageModel(new Chat((JObject)m)));
+                        //OnEnter?.Invoke(new Gift((JObject)m));
+                        //OnMessage?.Invoke(new MessageModel(new Chat((JObject)m)));
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Enter, (JObject)m));
                         break;
                     case "VideoLiveSocialMessage":
+                        //Logger.DebugLog(m.ToString());
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Subscribe, new User((JObject)m)));
                         break;
                     case "VideoLiveJoinDiscipulusMessage":
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Join, new User((JObject)m)));
                         break;
                     case "VideoLiveControlMessage":
+                        //Logger.DebugLog(m.ToString());
                         if (isRoomID)
                             UpdateRoomInfoWeb();
                         else
@@ -366,7 +371,11 @@ namespace XiguaDanmakuHelper
                     case "VideoLiveDiggMessage":
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Like, new User((JObject)m)));
                         break;
+                    case "VideoLiveVerifyMessage":
+                        OnMessage?.Invoke(new MessageModel(new Chat((JObject)m)));
+                        break;
                     default:
+                        //Logger.DebugLog(m.ToString());
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Other, (JObject)m));
                         break;
                 }

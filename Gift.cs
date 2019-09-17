@@ -11,6 +11,7 @@ namespace XiguaDanmakuHelper
         public static long RoomID = 0;
         public long count;
         public static Dictionary<long, string> GiftList = new Dictionary<long, string>();
+        public static Dictionary<long, int> GiftValue = new Dictionary<long, int>();
 
         public Gift(JObject j)
         {
@@ -45,23 +46,34 @@ namespace XiguaDanmakuHelper
             if (GiftList.ContainsKey(10001))
             {
                 GiftList[10001] = "西瓜";
+                GiftValue[10001] = 0;
             }
             else
             {
                 GiftList.Add(10001, "西瓜");
+                GiftValue.Add(10001, 0);
             }
-            var _text = Common.HttpGet($"https://i.snssdk.com/videolive/gift/get_gift_list?room_id={RoomID}&version_code=730&device_platform=android");
-            var j = JObject.Parse(_text);
-            if (j["gift_info"].Any())
-                foreach (var g in j["gift_info"])
-                    if (GiftList.ContainsKey((long)g["id"]))
-                    {
-                        GiftList[(long)g["id"]] = (string)g["name"];
-                    }
-                    else
-                    {
-                        GiftList.Add((long)g["id"], (string)g["name"]);
-                    }
+            try
+            {
+                var _text = Common.HttpGet($"https://i.snssdk.com/videolive/gift/get_gift_list?room_id={RoomID}&version_code=730&device_platform=android");
+                var j = JObject.Parse(_text);
+                if (j["gift_info"].Any())
+                    foreach (var g in j["gift_info"])
+                        if (GiftList.ContainsKey((long)g["id"]))
+                        {
+                            GiftList[(long)g["id"]] = (string)g["name"];
+                            GiftValue[(long)g["id"]] = (int)g["diamond_count"];
+                        }
+                        else
+                        {
+                            GiftList.Add((long)g["id"], (string)g["name"]);
+                            GiftValue.Add((long)g["id"], (int)g["diamond_count"]);
+                        }
+            }
+            catch
+            {
+
+            }
         }
 
         public override string ToString()
@@ -78,6 +90,17 @@ namespace XiguaDanmakuHelper
                 GiftN = $"未知礼物{ID}";
 
             return GiftN;
+        }
+
+        public long GetValue()
+        {
+            long GiftV;
+            if (GiftValue.ContainsKey(ID))
+                GiftV = GiftValue[ID];
+            else
+                GiftV = -1;
+
+            return GiftV;
         }
 
         public static async void UpdateGiftListAsync(long roomId)

@@ -69,7 +69,7 @@ namespace Bililive_dm
             string strout = " ";
             foreach (var a in str)
             {
-                byte[] bts = Encoding.UTF32.GetBytes(a.ToString()); 
+                byte[] bts = Encoding.UTF32.GetBytes(a.ToString());
 
                 if (!(bts[0].ToString() == "253" && bts[1].ToString() == "255"))
                 {

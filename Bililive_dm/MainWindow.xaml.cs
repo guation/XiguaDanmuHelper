@@ -46,7 +46,7 @@ namespace Bililive_dm
 
         private StoreModel settings;
 
-        private readonly string version = "2.2.0.9";
+        public const string version = "2.3.0.11";
 
         public ConfigData ConfigData = new ConfigData();
         public Logger Logger = new Logger();
@@ -134,12 +134,14 @@ namespace Bililive_dm
 
             Loaded += MainWindow_Loaded;
             Setting.GetConfig += GetConfig;
-            Setting.SetConfig += SetConfig;
+            //Setting.SetConfig += SetConfig;
             Landu();
             System.IO.Directory.CreateDirectory("log");//创造日志文件夹
             try
             {
-                var j = JObject.Parse(Config.Read());
+                //var j = JObject.Parse(Config.Read());
+                ConfigData = (ConfigData)Config.Read();
+                /*
                 LiverName.Text = ConfigData.Room = (string)j["Room"];
                 showBrand.IsChecked = ConfigData.ShowBrand = (bool)j["ShowBrand"];
                 showGrade.IsChecked = ConfigData.ShowGrade = (bool)j["ShowGrade"];
@@ -155,20 +157,15 @@ namespace Bililive_dm
                 ConfigData.DeBug = (bool)j["DeBug"];
                 ConfigData.BlackList = (string)j["BlackList"];
                 ConfigData.maxCapacity = (int)j["maxCapacity"];
-
+                */
+                UpdateUI();
             }
             catch
             {
                 logging("配置文件损坏或不存在，已生成新的配置文件。");
                 ConfigData = new ConfigData();
                 Config.Write(ConfigData);
-                LiverName.Text = ConfigData.Room;
-                showBrand.IsChecked = ConfigData.ShowBrand;
-                showGrade.IsChecked = ConfigData.ShowGrade;
-                showChat.IsChecked = ConfigData.ShowChat;
-                showPresent.IsChecked = ConfigData.ShowPresent;
-                showLike.IsChecked = ConfigData.ShowLike;
-                danMu.IsChecked = ConfigData.DanMu;
+                UpdateUI();
             }
             BlackList = ConfigData.BlackList.Split('|');
             new Thread(() =>
@@ -181,7 +178,7 @@ namespace Bililive_dm
                     {
                         var version1 = version.Split('.');
                         var version2 = json["version"].ToString().Split('.');
-                        for (var i = 0; i < 2; i++)
+                        for (var i = 0; i < 3; i++)
                         {
                             try
                             {
@@ -191,9 +188,10 @@ namespace Bililive_dm
                                     break;
                                 }
                             }
-                            catch (Exception)
+                            catch (Exception err)
                             {
                                 logging("检查更新失败，不影响软件使用。");
+                                logging(err.ToString(), "debug");
                             }
                         }
                     }
@@ -203,12 +201,26 @@ namespace Bililive_dm
                 {
                     logging("获取服务器信息失败，弹幕朗读功能可能会受影响。");
                 }
-            }).Start();
+            })
+            {
+                IsBackground = true
+            }.Start();
         }
 
-        private void b_LogMessage(string e)
+        private void UpdateUI()
         {
-            logging(e);
+            LiverName.Text = ConfigData.Room;
+            showBrand.IsChecked = ConfigData.ShowBrand;
+            showGrade.IsChecked = ConfigData.ShowGrade;
+            showChat.IsChecked = ConfigData.ShowChat;
+            showPresent.IsChecked = ConfigData.ShowPresent;
+            showLike.IsChecked = ConfigData.ShowLike;
+            danMu.IsChecked = ConfigData.DanMu;
+        }
+
+        private void b_LogMessage(string e, string level = "info")
+        {
+            logging(e, level);
         }
 
         [DllImport("user32", EntryPoint = "SetWindowLong")]
@@ -300,7 +312,7 @@ namespace Bililive_dm
             Config.Write(ConfigData);
             b = new Api(ConfigData.Room);
 
-            logging("是否为房间号" + b.isRoomID.ToString(),"debug");
+            logging("是否为房间号" + b.isRoomID.ToString(), "debug");
 
             ConnBtn.IsEnabled = false;
             DisconnBtn.IsEnabled = false;
@@ -309,15 +321,15 @@ namespace Bililive_dm
             connectresult = await b.ConnectAsync();
             if (connectresult)
             {
-                logging("連接成功");
-                AddDMText("提示", "連接成功", true);
+                logging("连接成功");
+                AddDMText("提示", "连接成功", true);
                 getDanmakuThread.Start();
-                logging(b.RoomID.ToString(),"debug");
+                logging(b.RoomID.ToString(), "debug");
             }
             else
             {
-                logging("連接失敗");
-                AddDMText("提示", "連接失敗", true);
+                logging("连接失败");
+                AddDMText("提示", "连接失败", true);
                 ConnBtn.IsEnabled = true;
             }
             if (b.isRoomID)
@@ -359,7 +371,24 @@ namespace Bililive_dm
                     if (ConfigData.ShowChat)
                     {
                         logging(danmakuModel.ChatModel.ToString());
-                        Hecheng(DelEmoji.filterEmoji(danmakuModel.ChatModel.content));
+                        Hecheng(DelEmoji.delEmoji(danmakuModel.ChatModel.content), true);
+                        
+                        new Thread(()=> {//创建一个线程来发送歌曲信息 防止因为点歌姬未开启导致的线程阻塞引发崩溃
+                            var a = danmakuModel.ChatModel.content;
+                            var b = a.Split(' ');
+                            if (a != "点歌" && b[0] == "点歌")
+                            {
+                                try
+                                {
+                                    logging(Common.HttpGet("http://localhost:23333/" + a.Replace("点歌 ", "")));
+                                }
+                                catch(Exception err)
+                                {
+                                    logging(err.ToString(), "debug");
+                                }
+                            }
+                        }).Start();
+
                         //经过多次测试发现弹幕中部分emoji不能被语音合成程序处理而导致主线程阻塞引发程序崩溃
                         //即使未引发崩溃也会导致程序不能继续正常工作出现假死状态
                         Dispatcher.BeginInvoke(new Action(() =>
@@ -498,7 +527,7 @@ namespace Bililive_dm
             setting.ShowDialog();
             ConfigData.Room = LiverName.Text.Trim();
             if (ConfigData.BlackList != "") BlackList = ConfigData.BlackList.Split('|');
-                
+
         }
         private void OnLiveStop()
         {
@@ -546,11 +575,11 @@ namespace Bililive_dm
         }
 
         // 合成
-        public void Hecheng(string wenzi)
+        public void Hecheng(string wenzi, bool isChat = false)
         {
             if (ConfigData.DanMu)
             {
-                if (ConfigData.BlackList != "")
+                if (isChat && ConfigData.BlackList != "")
                 {
                     foreach (var Black in BlackList)
                     {
@@ -559,11 +588,11 @@ namespace Bililive_dm
                         {
                             if (Regex.IsMatch(wenzi, black)) return;
                         }
-                        catch(Exception err)
+                        catch (Exception err)
                         {
-                            logging(err.ToString(),"debug");
+                            logging(err.ToString(), "debug");
                         }
-                        
+
                     }
                 }
                 var url = $"http://vps.guation.cn:8080/?msg={wenzi}&spd={ConfigData.spd}&pit={ConfigData.pit}&vol={ConfigData.vol}&per={ConfigData.per}";
@@ -623,12 +652,12 @@ namespace Bililive_dm
             p.Close();
             return output;
         }
-
+        /*
         public void SetConfig(ConfigData configData)
         {
             ConfigData = configData;
             Config.Write(ConfigData);
-        }
+        }*/
         public ConfigData GetConfig()
         {
             return ConfigData;

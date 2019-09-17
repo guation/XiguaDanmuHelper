@@ -2,6 +2,7 @@
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Web.Script.Serialization;
 
 namespace XiguaDanmakuHelper
 {
@@ -82,6 +83,34 @@ namespace XiguaDanmakuHelper
         public string BlackList = "";
         public int maxCapacity = 10;
 
+        public override string ToString()
+        {
+            return Config.getJsonByObject(this);
+        }
+
+        public static explicit operator ConfigData(string json)
+        {
+            return new JavaScriptSerializer().Deserialize<ConfigData>(json);
+        }
+    }
+
+    public enum SongChatEnum
+    {
+        Song,
+        Gift,
+        CheckIn,
+        Speak,
+        Delte
+    }
+
+    public class SongChat
+    {
+        public SongChatEnum Type = SongChatEnum.Song;
+        public string Search = "";
+        public string UserName = "sy挂神";
+        public long UserID = 110756724607;
+        public int Diamond = 0;
+        public const string Version = "19.8.18";
         public override string ToString()
         {
             return Config.getJsonByObject(this);

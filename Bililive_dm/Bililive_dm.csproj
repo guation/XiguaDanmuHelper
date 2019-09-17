@@ -15,7 +15,8 @@
     <WarningLevel>4</WarningLevel>
     <ExpressionBlendVersion>5.0.40218.0</ExpressionBlendVersion>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <PublishUrl>發行\</PublishUrl>
@@ -186,7 +187,6 @@
     </ApplicationDefinition>
     <Compile Include="DelEmoji.cs" />
     <Compile Include="IDanmakuWindow.cs" />
-    <Compile Include="Logger.cs" />
     <Compile Include="Mp3Player.cs" />
     <Compile Include="OptionDialog.xaml.cs">
       <DependentUpon>OptionDialog.xaml</DependentUpon>
