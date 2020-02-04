@@ -298,8 +298,8 @@ namespace XiguaDanmakuHelper
                 return;
             }
 
-            var url =
-                $"https://i.snssdk.com/videolive/im/get_msg?cursor={cursor}&room_id={RoomID}&version_code=730&device_platform=android";
+            var url = $"https://i.snssdk.com/videolive/im/get_msg?cursor={cursor}&room_id={RoomID}&version_code=730&device_platform=android";
+
             string _text;
             try
             {
@@ -336,6 +336,10 @@ namespace XiguaDanmakuHelper
                 {
                     case "VideoLivePresentMessage":
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Gifting, new Gift((JObject)m)));
+                        break;
+                    case "SunDailyRankMessage":
+                        break;
+                    case "WebcastXGLotteryMessage":
                         break;
                     case "VideoLivePresentEndTipMessage":
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Gift, new Gift((JObject)m)));
@@ -375,7 +379,7 @@ namespace XiguaDanmakuHelper
                         OnMessage?.Invoke(new MessageModel(new Chat((JObject)m)));
                         break;
                     default:
-                        //Logger.DebugLog(m.ToString());
+                        Logger.DebugLog(m.ToString());
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Other, (JObject)m));
                         break;
                 }

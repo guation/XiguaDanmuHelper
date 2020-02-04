@@ -27,9 +27,11 @@ namespace Bililive_dm
     {
         private const int WS_EX_TRANSPARENT = 0x20;
         private const int GWL_EXSTYLE = -20;
-        private uint[] abc = { 0, 0, 0 };
+        //private uint[] abc = { 0, 0, 0 };
 
         private readonly Queue<MessageModel> _danmakuQueue = new Queue<MessageModel>();
+
+        private readonly Queue<string> DanmuHecheng = new Queue<string>();
 
         private readonly ObservableCollection<string> _messageQueue = new ObservableCollection<string>();
 
@@ -46,7 +48,7 @@ namespace Bililive_dm
 
         private StoreModel settings;
 
-        public const string version = "2.3.0.11";
+        public const string version = "2.3.1.12";
 
         public ConfigData ConfigData = new ConfigData();
         public Logger Logger = new Logger();
@@ -178,21 +180,28 @@ namespace Bililive_dm
                     {
                         var version1 = version.Split('.');
                         var version2 = json["version"].ToString().Split('.');
-                        for (var i = 0; i < 3; i++)
+                        try
                         {
-                            try
+                            if (int.Parse(version1[0]) < int.Parse(version2[0]))
                             {
-                                if (int.Parse(version1[i]) < int.Parse(version2[i]))
+                                logging($"检测到版本更新，当前版本{version}，最新版本{(string)json["version"]}，新版本简介：{(string)json["update"]}。");
+                            }
+                            else if(int.Parse(version1[0]) == int.Parse(version2[0]))
+                            {
+                                if (int.Parse(version1[1]) < int.Parse(version2[1]))
                                 {
                                     logging($"检测到版本更新，当前版本{version}，最新版本{(string)json["version"]}，新版本简介：{(string)json["update"]}。");
-                                    break;
+                                }
+                                else if ((int.Parse(version1[1]) == int.Parse(version2[1])) && (int.Parse(version1[2]) < int.Parse(version2[2]))) 
+                                {
+                                    logging($"检测到版本更新，当前版本{version}，最新版本{(string)json["version"]}，新版本简介：{(string)json["update"]}。");
                                 }
                             }
-                            catch (Exception err)
-                            {
-                                logging("检查更新失败，不影响软件使用。");
-                                logging(err.ToString(), "debug");
-                            }
+                        }
+                        catch (Exception err)
+                        {
+                            logging("检查更新失败，不影响软件使用。");
+                            logging(err.ToString(), "debug");
                         }
                     }
                     if (json["msg"].ToString() != "") logging("公告：" + json["msg"].ToString());
@@ -308,6 +317,11 @@ namespace Bililive_dm
 
         private async void connbtn_Click(object sender, RoutedEventArgs e)
         {
+            Logger.DisplayText("", true);
+            Logger.DisplayText("", true);
+            Logger.DisplayText("", true);
+            Logger.DisplayText("", true);
+            Logger.DisplayText("", true);
             ConfigData.Room = LiverName.Text.Trim();
             Config.Write(ConfigData);
             b = new Api(ConfigData.Room);
@@ -371,6 +385,7 @@ namespace Bililive_dm
                     if (ConfigData.ShowChat)
                     {
                         logging(danmakuModel.ChatModel.ToString());
+                        Logger.DisplayText(danmakuModel.ChatModel.ToString());
                         Hecheng(DelEmoji.delEmoji(danmakuModel.ChatModel.content), true);
                         
                         new Thread(()=> {//创建一个线程来发送歌曲信息 防止因为点歌姬未开启导致的线程阻塞引发崩溃
@@ -405,6 +420,8 @@ namespace Bililive_dm
                         {
                             logging("收到礼物 : " + danmakuModel.GiftModel.user + " 赠送的 " + danmakuModel.GiftModel.count +
                                     " 个 " + danmakuModel.GiftModel.GetName());
+                            Logger.DisplayText("收到礼物 : " + danmakuModel.GiftModel.user + " 赠送的 " + danmakuModel.GiftModel.count +
+                                    " 个 " + danmakuModel.GiftModel.GetName(), true);
                             Hecheng("感谢" + danmakuModel.GiftModel.user + " 赠送的 " + danmakuModel.GiftModel.count +
                                     " 个 " + danmakuModel.GiftModel.GetName());
                             Dispatcher.BeginInvoke(new Action(() =>
@@ -517,6 +534,18 @@ namespace Bililive_dm
         public void Test_OnClick(object sender, RoutedEventArgs e)
         {
             AddDMText("提示", "這是一個測試😀😭", true);
+            AddDMText("提示", "欢迎使用挂神西瓜直播非官方弹幕助手。");
+            Hecheng("欢迎使用挂神西瓜直播非官方弹幕助手");
+            Logger.DisplayText("礼物测试1", true);
+            Logger.DisplayText("礼物测试2", true);
+            Logger.DisplayText("礼物测试3", true);
+            Logger.DisplayText("礼物测试4", true);
+            Logger.DisplayText("礼物测试5", true);
+            Logger.DisplayText("弹幕测试1");
+            Logger.DisplayText("弹幕测试2");
+            Logger.DisplayText("弹幕测试3");
+            Logger.DisplayText("弹幕测试4");
+            Logger.DisplayText("弹幕测试5");
         }
 
         private void Setting_OnClick(object sender, RoutedEventArgs e)
@@ -537,9 +566,25 @@ namespace Bililive_dm
 
         private void Disconnbtn_OnClick(object sender, RoutedEventArgs e)
         {
+            /*
             abc[0] = 0;//清除弹幕统计
             abc[1] = 0;//清除计划任务
             abc[2] = 0;//关闭弹幕朗读
+            */
+            lock (DanmuHecheng)
+            {
+                while (true)
+                {
+                    if (DanmuHecheng.Any())
+                    {
+                        _ = DanmuHecheng.Dequeue();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
             ConnBtn.IsEnabled = true;
             getDanmakuThread.Abort();
             getDanmakuThread = new Thread(() =>
@@ -577,40 +622,70 @@ namespace Bililive_dm
         // 合成
         public void Hecheng(string wenzi, bool isChat = false)
         {
+            if (wenzi == "") return;
             if (ConfigData.DanMu)
             {
-                if (isChat && ConfigData.BlackList != "")
-                {
-                    foreach (var Black in BlackList)
+                if (isChat) {
+                    if (wenzi.Length > ConfigData.maxSize) return;
+                    if (ConfigData.BlackList != "")
                     {
-                        var black = Black.Trim();
-                        try
+                        foreach (var Black in BlackList)
                         {
-                            if (Regex.IsMatch(wenzi, black)) return;
-                        }
-                        catch (Exception err)
-                        {
-                            logging(err.ToString(), "debug");
-                        }
+                            var black = Black.Trim();
+                            try
+                            {
+                                if (Regex.IsMatch(wenzi, black)) return;
+                            }
+                            catch (Exception err)
+                            {
+                                logging(err.ToString(), "debug");
+                            }
 
+                        }
                     }
                 }
+                lock (DanmuHecheng)
+                {
+                    DanmuHecheng.Enqueue(wenzi);
+                }
+                /*
                 var url = $"http://vps.guation.cn:8080/?msg={wenzi}&spd={ConfigData.spd}&pit={ConfigData.pit}&vol={ConfigData.vol}&per={ConfigData.per}";
                 if (Common.HttpDownload(url, "tmp/" + abc[0] + ".mp3"))
                 {
                     abc[0]++;
                     abc[2]++;
-                }
+                }*/
             }
         }
 
         private void Landu()
         {
+            var count = 0;
             Mp3Player mp3Player = new Mp3Player();
-            Thread td = new Thread((ThreadStart)delegate //不在主线程运行时无法打开音频文件需要进行委托 https://zhidao.baidu.com/question/1988707588257169467.html
+            Thread td = new Thread((ThreadStart)delegate //不在主线程运行时无法打开音频文件,需要进行委托 https://zhidao.baidu.com/question/1988707588257169467.html
             {
                 while (true)
                 {
+                    lock (DanmuHecheng)
+                    {
+                        if (DanmuHecheng.Any()){
+                            var url = $"http://vps.guation.cn:8080/?msg={DanmuHecheng.Dequeue()}&spd={ConfigData.spd}&pit={ConfigData.pit}&vol={ConfigData.vol}&per={ConfigData.per}";
+                            if (Common.HttpDownload(url, "tmp/" + count + ".mp3"))
+                            {
+                                mp3Player.AutoPlay("tmp/" + count + ".mp3");
+                                count++;
+                                /*
+                                abc[0]++;
+                                abc[2]++;*/
+                            }
+                            if (DanmuHecheng.Count > ConfigData.maxCapacity) {
+                                logging("弹幕缓存上限已跳过朗读部分弹幕。");
+                                for (var i = 0; i < ConfigData.maxCapacity - 1 ; i++) 
+                                    _ = DanmuHecheng.Dequeue();
+                            }
+                        }
+                    }
+                    /*
                     if (abc[2] > 0)
                     {
                         mp3Player.AutoPlay("tmp/" + abc[1] + ".mp3");
@@ -622,7 +697,7 @@ namespace Bililive_dm
                         abc[1] = abc[0] - 1;
                         abc[2] = 1;//朗读最后一条弹幕
                         logging("弹幕缓存上限已跳过朗读部分弹幕。");
-                    }
+                    }*/
                     Thread.Sleep(200);
                 }
             });

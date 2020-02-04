@@ -20,6 +20,7 @@ namespace XiguaDanmakuHelper
             user = new User(j);
             if (j["common"]?["room_id"] != null)
             {
+                //RoomID = 6787894152118930189;
                 RoomID = (long)j["common"]["room_id"];
                 UpdateGiftList();
             }
@@ -56,6 +57,7 @@ namespace XiguaDanmakuHelper
             try
             {
                 var _text = Common.HttpGet($"https://i.snssdk.com/videolive/gift/get_gift_list?room_id={RoomID}&version_code=730&device_platform=android");
+                Logger.DebugLog(_text);
                 var j = JObject.Parse(_text);
                 if (j["gift_info"].Any())
                     foreach (var g in j["gift_info"])

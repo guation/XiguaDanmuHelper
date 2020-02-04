@@ -82,6 +82,7 @@ namespace XiguaDanmakuHelper
         public bool DeBug { get; set; } = false;
         public string BlackList = "";
         public int maxCapacity = 10;
+        public int maxSize = 45;
 
         public override string ToString()
         {

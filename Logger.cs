@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace XiguaDanmakuHelper
 {
@@ -35,6 +36,81 @@ namespace XiguaDanmakuHelper
             catch (Exception)
             {
 
+            }
+        }
+        
+        public static void DisplayText(string str, bool isGift = false)
+        {
+            string[] idata = new string[6];
+            idata[5] = str;
+            try
+            {
+                StreamReader sr = new StreamReader("log/Chat.txt", System.Text.Encoding.UTF8);
+                string line;
+                for(var i = 0; i < 5; i++)
+                {
+                    if ((line = sr.ReadLine()) != null)
+                    {
+                        idata[i] = line.ToString();
+                    }
+                }
+                sr.Close();
+            }
+            catch (Exception e)
+            {
+                idata[0] = e.ToString();
+            }
+
+            try
+            {
+                //FileMode.Append为不覆盖文件效果.create为覆盖
+                FileStream fs = new FileStream("log/Chat.txt", FileMode.Create);
+                byte[] data = System.Text.Encoding.UTF8.GetBytes(idata[1] + "\n" + idata[2] + "\n" + idata[3] + "\n" + idata[4] + "\n" + idata[5]);
+                fs.Write(data, 0, data.Length);
+                fs.Flush();
+                fs.Close();
+
+            }
+            catch (Exception)
+            {
+
+            }
+            if (isGift)
+            {
+                idata = new string[6];
+                idata[5] = str;
+                try
+                {
+                    StreamReader sr = new StreamReader("log/Gift.txt", System.Text.Encoding.UTF8);
+                    string line;
+                    for (var i = 0; i < 5; i++)
+                    {
+                        if ((line = sr.ReadLine()) != null)
+                        {
+                            idata[i] = line.ToString();
+                        }
+                    }
+                    sr.Close();
+                }
+                catch (Exception e)
+                {
+                    idata[0] = e.ToString();
+                }
+
+                try
+                {
+                    //FileMode.Append为不覆盖文件效果.create为覆盖
+                    FileStream fs = new FileStream("log/Gift.txt", FileMode.Create);
+                    byte[] data = System.Text.Encoding.UTF8.GetBytes(idata[1] + "\n" + idata[2] + "\n" + idata[3] + "\n" + idata[4] + "\n" + idata[5]);
+                    fs.Write(data, 0, data.Length);
+                    fs.Flush();
+                    fs.Close();
+
+                }
+                catch (Exception)
+                {
+
+                }
             }
         }
 
