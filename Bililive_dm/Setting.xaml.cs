@@ -28,6 +28,7 @@ namespace Bililive_dm
             slider1.Value = configData.spd;
             slider2.Value = configData.pit;
             slider3.Value = configData.vol;
+            slider4.Value = configData.maxSize;
             switch (configData.per)
             {
                 case 0:
@@ -55,7 +56,7 @@ namespace Bililive_dm
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("    欢迎使用西瓜直非官方助手。\n    本软件原作者 q792602257 ，当前分支由 挂神 维护。\n    软件在使用过程出现问题可通过“用户反馈”或以下方式联系挂神：哔哩哔哩@I挂神I、西瓜视频@sy挂神、GitHub@guation。\n   如果您觉得此软件对您有帮助也可以考虑赞助本软件的开发，挂神的QQ群：291283968，挂神的QQ：1853306918。\n    本软件完全开源，项目地址：https://github.com/guation/XiguaDanmuHelper \n    您可以在不违反协议的情况下进行二次开发。", "关于本软件");
+            MessageBox.Show("    欢迎使用西瓜直非官方助手。\n    本软件原作者 q792602257 ，当前分支由 挂神 维护。\n    软件在使用过程出现问题可通过“用户反馈”或以下方式联系挂神：哔哩哔哩@I挂神I、西瓜视频@sy挂神、GitHub@guation。\n   如果您觉得此软件对您有帮助也可以考虑赞助本软件的开发，挂神的QQ群：291283968，挂神的QQ：1853306918。\n    本软件完全开源，严禁倒卖，项目地址：https://github.com/guation/XiguaDanmuHelper \n    您可以在不违反协议的情况下进行二次开发。", "关于本软件");
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)

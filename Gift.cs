@@ -44,21 +44,24 @@ namespace XiguaDanmakuHelper
         {
             //GiftList = new Dictionary<long, string>();
             //GiftList.Add(10001, "西瓜");
+            /*
             if (GiftList.ContainsKey(10001))
             {
-                GiftList[10001] = "西瓜";
+                GiftList[10001] = "西瓜1";
                 GiftValue[10001] = 0;
             }
             else
             {
-                GiftList.Add(10001, "西瓜");
+                GiftList.Add(10001, "西瓜1");
                 GiftValue.Add(10001, 0);
-            }
+            }*/
             try
             {
-                var _text = Common.HttpGet($"https://i.snssdk.com/videolive/gift/get_gift_list?room_id={RoomID}&version_code=730&device_platform=android");
-                Logger.DebugLog(_text);
+                //var _text = Common.HttpGet($"https://i.snssdk.com/videolive/gift/get_gift_list?room_id={RoomID}&version_code=730&device_platform=android");
+                var _text = Common.HttpGet($"https://webcast3-lq.ixigua.com/webcast/gift/list/?room_id={RoomID}&webcast_sdk_version=1450&aid=32&version_code=836&device_platform=android");
+                //Logger.DebugLog(_text);
                 var j = JObject.Parse(_text);
+                /*
                 if (j["gift_info"].Any())
                     foreach (var g in j["gift_info"])
                         if (GiftList.ContainsKey((long)g["id"]))
@@ -71,6 +74,20 @@ namespace XiguaDanmakuHelper
                             GiftList.Add((long)g["id"], (string)g["name"]);
                             GiftValue.Add((long)g["id"], (int)g["diamond_count"]);
                         }
+                        */
+                if (j["data"]["pages"].Any())
+                    foreach (var p in j["data"]["pages"])
+                        foreach(var g in p["gifts"])
+                            if (GiftList.ContainsKey((long)g["id"]))
+                            {
+                                GiftList[(long)g["id"]] = (string)g["name"];
+                                GiftValue[(long)g["id"]] = (int)g["diamond_count"];
+                            }
+                            else
+                            {
+                                GiftList.Add((long)g["id"], (string)g["name"]);
+                                GiftValue.Add((long)g["id"], (int)g["diamond_count"]);
+                            }
             }
             catch
             {

@@ -48,12 +48,14 @@ namespace Bililive_dm
 
         private StoreModel settings;
 
-        public const string version = "2.3.1.12";
+        public const string version = "2.3.2.13";
 
         public ConfigData ConfigData = new ConfigData();
         public Logger Logger = new Logger();
 
         public string[] BlackList;
+
+        public bool isSaveToggle = false;
 
         public MainWindow()
         {
@@ -139,6 +141,7 @@ namespace Bililive_dm
             //Setting.SetConfig += SetConfig;
             Landu();
             System.IO.Directory.CreateDirectory("log");//创造日志文件夹
+            System.IO.Directory.CreateDirectory("toggle");//创造记录文件夹
             try
             {
                 //var j = JObject.Parse(Config.Read());
@@ -164,10 +167,12 @@ namespace Bililive_dm
             }
             catch
             {
-                logging("配置文件损坏或不存在，已生成新的配置文件。");
+                //logging("配置文件损坏或不存在，已生成新的配置文件。");
                 ConfigData = new ConfigData();
                 Config.Write(ConfigData);
                 UpdateUI();
+                MessageBox.Show("    欢迎使用西瓜直非官方助手。\n    本软件原作者 q792602257 ，当前分支由 挂神 维护。\n    本软件完全开源，挂神不会以任何形式销售本软件，严禁倒卖。\n    更多说明请前往 更多设置-关于程序 查看，或翻阅软件附带的“说明”文件。\n    您可以在关闭软件后将原安装目录下的Config.json文件覆盖本目录下的Config.json进行配置迁移。", "关于本软件");
+
             }
             BlackList = ConfigData.BlackList.Split('|');
             new Thread(() =>
@@ -270,6 +275,8 @@ namespace Bililive_dm
         {
             ConfigData.Room = LiverName.Text.Trim();
             Config.Write(ConfigData);
+            if (isSaveToggle == false) 
+                Logger.SaveToggle();
         }
 
         ~MainWindow()
@@ -339,6 +346,9 @@ namespace Bililive_dm
                 AddDMText("提示", "连接成功", true);
                 getDanmakuThread.Start();
                 logging(b.RoomID.ToString(), "debug");
+                isSaveToggle = false;
+                if (!b.isRoomID)
+                    LiverName.Text = b.user.ToString();
             }
             else
             {
@@ -346,10 +356,12 @@ namespace Bililive_dm
                 AddDMText("提示", "连接失败", true);
                 ConnBtn.IsEnabled = true;
             }
+            /*
             if (b.isRoomID)
                 LiverName.Text = b.liverName.ToString();
             else
                 LiverName.Text = b.user.ToString();
+                */
             DisconnBtn.IsEnabled = true;
         }
 
@@ -413,6 +425,7 @@ namespace Bililive_dm
                     }
                     break;
                 case MessageEnum.Gifting:
+
                     break;
                 case MessageEnum.Gift:
                     {
@@ -601,6 +614,8 @@ namespace Bililive_dm
                     }
             })
             { IsBackground = true };
+            logging(Logger.SaveToggle());
+            isSaveToggle = true;
         }
 
         private void UIElement_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)

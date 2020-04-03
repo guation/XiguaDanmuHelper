@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace XiguaDanmakuHelper
@@ -11,6 +12,8 @@ namespace XiguaDanmakuHelper
         private readonly string brand;
         private readonly int level;
         private readonly int type;
+        public static Dictionary<long, string> UserList = new Dictionary<long, string>();
+
 
         public User(JObject j)
         {
@@ -45,6 +48,14 @@ namespace XiguaDanmakuHelper
                 {
                     type = (int)j["extra"]["user_room_auth_status"]["user_type"];
                 }
+            }
+            if (UserList.ContainsKey(ID))
+            {
+                UserList[ID] = Name;
+            }
+            else
+            {
+                UserList.Add(ID, Name);
             }
         }
 

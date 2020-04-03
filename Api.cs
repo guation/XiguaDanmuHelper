@@ -335,6 +335,7 @@ namespace XiguaDanmakuHelper
                 switch ((string)m["common"]["method"])
                 {
                     case "VideoLivePresentMessage":
+                        //Logger.DebugLog(m.ToString());
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Gifting, new Gift((JObject)m)));
                         break;
                     case "SunDailyRankMessage":
@@ -379,7 +380,7 @@ namespace XiguaDanmakuHelper
                         OnMessage?.Invoke(new MessageModel(new Chat((JObject)m)));
                         break;
                     default:
-                        Logger.DebugLog(m.ToString());
+                        //Logger.DebugLog(m.ToString());
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Other, (JObject)m));
                         break;
                 }

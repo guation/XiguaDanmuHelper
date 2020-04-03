@@ -5,12 +5,12 @@ namespace XiguaDanmakuHelper
 {
     public class Logger
     {
-        public readonly string time = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
+        public readonly string Time = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
         public void SaveLog(string str, string level)
         {
             try
             {
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter("log/" + time + ".log", true))
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter("log/" + Time + ".log", true))
                 {
                     file.WriteLine("[" + level + "]" + str);// 直接追加文件末尾，换行 
                     file.Flush();
@@ -22,6 +22,34 @@ namespace XiguaDanmakuHelper
 
             }
         }
+
+        public string SaveToggle()
+        {
+            var NowTime = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
+            var str = $"连接时间{Time}结束时间{NowTime}\n本次直播共 {User.UserList.Count} 位观众在你直播间留下足迹。\n";
+            var retstr = str + $"详情请查看toggle/{Time}.txt";
+            long[] key = new long[User.UserList.Count];
+            User.UserList.Keys.CopyTo(key, 0);
+            for(var i = 0; i < User.UserList.Count; i++)
+            {
+                str += $"{key[i]} : {User.UserList[key[i]]}\n";
+            }
+            try
+            {
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter("toggle/" + Time + ".txt", true))
+                {
+                    file.WriteLine(str);
+                    file.Flush();
+                    file.Close();
+                }
+            }
+            catch (Exception e)
+            {
+                System.Windows.Forms.MessageBox.Show(e.ToString());
+            }
+            return retstr;
+        }
+
         public static void DebugLog(string str)
         {
             try

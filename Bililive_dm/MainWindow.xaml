@@ -48,7 +48,7 @@
 
         </StackPanel>
 
-        <TextBlock x:Name="Info" Text="非西瓜直播官方弹幕助手 最终作者挂神 感谢前代作者代码 版本号："
+        <TextBlock x:Name="Info" Text="非西瓜直播官方弹幕助手 最终作者挂神 感谢前代作者代码 免费软件严禁倒卖 版本号："
                    DockPanel.Dock="Bottom" VerticalAlignment="Bottom" />
 
         <TabControl x:Name="TabControl">
