@@ -22,7 +22,7 @@ namespace XiguaDanmakuHelper
             {
                 //RoomID = 6787894152118930189;
                 RoomID = (long)j["common"]["room_id"];
-                UpdateGiftList();
+                //UpdateGiftList();
             }
             if (j["extra"]?["present_end_info"] != null && j["extra"]["present_end_info"].Any())
             {

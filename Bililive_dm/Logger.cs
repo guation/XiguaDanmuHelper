@@ -1,7 +1,8 @@
-﻿using System;
+﻿using GT_XiguaAPI;
+using System;
 using System.IO;
 
-namespace XiguaDanmakuHelper
+namespace Bililive_dm
 {
     public class Logger
     {

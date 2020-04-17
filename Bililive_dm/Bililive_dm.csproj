@@ -53,6 +53,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -64,6 +65,7 @@
     <WarningLevel>4</WarningLevel>
     <PreBuildEvent>"C:\Program Files (x86)\Windows Kits\8.1\bin\x64\signtool.exe" sign  /t http://timestamp.verisign.com/scripts/timstamp.dll /n JerryYan $(MSBuildProjectDirectory)\Win32\*.dll $(MSBuildProjectDirectory)\x64\*.dll</PreBuildEvent>
     <SignManifests>true</SignManifests>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>F96713F7B6545CCB5EDF1DA021E8140C13BDF0A9</ManifestCertificateThumbprint>
@@ -96,6 +98,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -105,6 +108,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>false</SignManifests>
@@ -160,6 +164,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -176,6 +181,10 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\GT_XiguaAPI\GT_XiguaAPI.csproj">
+      <Project>{063EDDCB-C581-4D44-B406-7AB429A782B5}</Project>
+      <Name>GT_XiguaAPI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\XiguaDanmakuHelper.csproj">
       <Project>{ef4a36e2-acc0-40fc-af60-44e0e28d2e5f}</Project>
       <Name>XiguaDanmakuHelper</Name>
@@ -186,8 +195,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Config.cs" />
     <Compile Include="DelEmoji.cs" />
     <Compile Include="IDanmakuWindow.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="Mp3Player.cs" />
     <Compile Include="OptionDialog.xaml.cs">
       <DependentUpon>OptionDialog.xaml</DependentUpon>
@@ -318,12 +329,6 @@
     </PublishFile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Runtime.dll">
-      <Link>System.Runtime.dll</Link>
-    </Content>
-    <Content Include="..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Threading.Tasks.dll">
-      <Link>System.Threading.Tasks.dll</Link>
-    </Content>
     <Content Include="Win32\libwtfdanmaku.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -4,7 +4,7 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Web.Script.Serialization;
 
-namespace XiguaDanmakuHelper
+namespace Bililive_dm
 {
     public class Config
     {
@@ -57,6 +57,7 @@ namespace XiguaDanmakuHelper
             byte[] dataBytes = new byte[stream.Length];//写入内存流中
             stream.Position = 0;
             stream.Read(dataBytes, 0, (int)stream.Length);
+            stream.Close();
             return Encoding.UTF8.GetString(dataBytes);//通过UTF8格式转换为字符串
         }
     }
@@ -72,9 +73,8 @@ namespace XiguaDanmakuHelper
         public bool ShowPresent { get; set; } = true;
         public bool ShowLike { get; set; } = true;
         public bool DanMu { get; set; } = true;
-        //public bool JoinRoom { get; set; } = false;
-        //public bool ShowFollow { get; set; } = true;
-
+        public bool JoinRoom { get; set; } = true;
+        public bool ShowFollow { get; set; } = true;
         public int spd = 5, pit = 5, vol = 1, per = 4;
 
         public bool CanUpdate = true;

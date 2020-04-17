@@ -16,7 +16,8 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using System.Xml.Serialization;
-using XiguaDanmakuHelper;
+//using XiguaDanmakuHelper;
+using GT_XiguaAPI;
 
 namespace Bililive_dm
 {
@@ -40,7 +41,8 @@ namespace Bililive_dm
         private readonly ObservableCollection<SessionItem> SessionItems = new ObservableCollection<SessionItem>();
 
         private readonly DispatcherTimer timer;
-        private Api b;
+        //private Api b;
+        private XiguaAPI b;
         private IDanmakuWindow fulloverlay;
         private Thread getDanmakuThread;
         public MainOverlay overlay;
@@ -48,7 +50,7 @@ namespace Bililive_dm
 
         private StoreModel settings;
 
-        public const string version = "2.3.2.13";
+        public const string version = "2.3.3.14";
 
         public ConfigData ConfigData = new ConfigData();
         public Logger Logger = new Logger();
@@ -65,18 +67,24 @@ namespace Bililive_dm
             Info.Text += version;
             //初始化日志
             //LiverName.Text = "挂神";
-            b = new Api();
+            //b = new Api();
+            b = new XiguaAPI();
             overlay_enabled = true;
             OpenOverlay();
             overlay.Show();
 
             Closed += MainWindow_Closed;
 
-            Api.OnMessage += b_ReceivedDanmaku;
-            Api.OnLeave += OnLiveStop;
+            //Api.OnMessage += b_ReceivedDanmaku;
+            //Api.OnLeave += OnLiveStop;
             //            b.OnMessage += ProcDanmaku;
-            Api.LogMessage += b_LogMessage;
-            Api.OnRoomCounting += b_ReceivedRoomCount;
+            //Api.LogMessage += b_LogMessage;
+            //Api.OnRoomCounting += b_ReceivedRoomCount;
+
+            XiguaAPI.OnMessage += b_ReceivedDanmaku;
+            XiguaAPI.OnLeave += OnLiveStop;
+            XiguaAPI.LogMessage += b_LogMessage;
+            XiguaAPI.OnRoomCounting += b_ReceivedRoomCount;
 
             timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, FuckMicrosoft,
                 Dispatcher);
@@ -144,30 +152,11 @@ namespace Bililive_dm
             System.IO.Directory.CreateDirectory("toggle");//创造记录文件夹
             try
             {
-                //var j = JObject.Parse(Config.Read());
                 ConfigData = (ConfigData)Config.Read();
-                /*
-                LiverName.Text = ConfigData.Room = (string)j["Room"];
-                showBrand.IsChecked = ConfigData.ShowBrand = (bool)j["ShowBrand"];
-                showGrade.IsChecked = ConfigData.ShowGrade = (bool)j["ShowGrade"];
-                showChat.IsChecked = ConfigData.ShowChat = (bool)j["ShowChat"];
-                showPresent.IsChecked = ConfigData.ShowPresent = (bool)j["ShowPresent"];
-                showLike.IsChecked = ConfigData.ShowLike = (bool)j["ShowLike"];
-                danMu.IsChecked = ConfigData.DanMu = (bool)j["DanMu"];
-                ConfigData.spd = (int)j["spd"];
-                ConfigData.pit = (int)j["pit"];
-                ConfigData.vol = (int)j["vol"];
-                ConfigData.per = (int)j["per"];
-                ConfigData.CanUpdate = (bool)j["CanUpdate"];
-                ConfigData.DeBug = (bool)j["DeBug"];
-                ConfigData.BlackList = (string)j["BlackList"];
-                ConfigData.maxCapacity = (int)j["maxCapacity"];
-                */
                 UpdateUI();
             }
             catch
             {
-                //logging("配置文件损坏或不存在，已生成新的配置文件。");
                 ConfigData = new ConfigData();
                 Config.Write(ConfigData);
                 UpdateUI();
@@ -331,8 +320,8 @@ namespace Bililive_dm
             Logger.DisplayText("", true);
             ConfigData.Room = LiverName.Text.Trim();
             Config.Write(ConfigData);
-            b = new Api(ConfigData.Room);
-
+            //b = new Api(LiverName.Text.Trim());
+            b = new XiguaAPI(LiverName.Text.Trim());
             logging("是否为房间号" + b.isRoomID.ToString(), "debug");
 
             ConnBtn.IsEnabled = false;
@@ -356,23 +345,17 @@ namespace Bililive_dm
                 AddDMText("提示", "连接失败", true);
                 ConnBtn.IsEnabled = true;
             }
-            /*
-            if (b.isRoomID)
-                LiverName.Text = b.liverName.ToString();
-            else
-                LiverName.Text = b.user.ToString();
-                */
             DisconnBtn.IsEnabled = true;
         }
 
-        public void b_ReceivedRoomCount(long popularity)
+        public void b_ReceivedRoomCount(string popularity)
         {
             //            logging("當前房間人數:" + e.UserCount);
             //            AddDMText("當前房間人數", e.UserCount+"", true);
             //AddDMText(e.Danmaku.CommentUser, e.Danmaku.CommentText);
             if (CheckAccess())
             {
-                OnlinePopularity.Text = popularity.ToString();
+                OnlinePopularity.Text = popularity;
                 //AddDMText("当前房间人气", popularity.ToString() + "", true);
             }
             else
@@ -424,48 +407,54 @@ namespace Bililive_dm
                         }));
                     }
                     break;
-                case MessageEnum.Gifting:
-
-                    break;
                 case MessageEnum.Gift:
                     {
-                        if (ConfigData.ShowPresent)
+                        if (ConfigData.ShowPresent && danmakuModel.GiftModel.isEnd)
                         {
-                            logging("收到礼物 : " + danmakuModel.GiftModel.user + " 赠送的 " + danmakuModel.GiftModel.count +
-                                    " 个 " + danmakuModel.GiftModel.GetName());
-                            Logger.DisplayText("收到礼物 : " + danmakuModel.GiftModel.user + " 赠送的 " + danmakuModel.GiftModel.count +
-                                    " 个 " + danmakuModel.GiftModel.GetName(), true);
-                            Hecheng("感谢" + danmakuModel.GiftModel.user + " 赠送的 " + danmakuModel.GiftModel.count +
-                                    " 个 " + danmakuModel.GiftModel.GetName());
+                            logging($"收到礼物 : {danmakuModel.GiftModel.user} 赠送的 {danmakuModel.GiftModel.count} 个 {danmakuModel.GiftModel.GetName()}");
+                            Logger.DisplayText($"收到礼物 : {danmakuModel.GiftModel.user} 赠送的 {danmakuModel.GiftModel.count} 个 {danmakuModel.GiftModel.GetName()}", true);
+                            Hecheng($"感谢{danmakuModel.GiftModel.user}赠送的{danmakuModel.GiftModel.count}个{danmakuModel.GiftModel.GetName()}");
                             Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            AddDMText("收到礼物",
-                                danmakuModel.GiftModel.ToString(), true);
-                        }));
+                            {
+                                AddDMText("收到礼物", danmakuModel.GiftModel.ToString(), true);
+                            }));
                         }
                         break;
                     }
-                case MessageEnum.Join:
+                case MessageEnum.JoinFansclub:
                     {
                         if (ConfigData.ShowPresent)
                         {
-                            logging("粉丝团新成员 : 欢迎 " + danmakuModel.UserModel + " 加入了粉丝团");
-                            Hecheng("欢迎 " + danmakuModel.UserModel + " 加入了粉丝团");
+                            logging($"粉丝团新成员 : {danmakuModel.UserModel} 加入了粉丝团");
+                            Hecheng($"欢迎{danmakuModel.UserModel}加入了粉丝团");
                             Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            AddDMText("粉丝团新成员",
-                                "欢迎" + danmakuModel.UserModel + "加入了粉丝团", true);
-                        }));
+                            {
+                                AddDMText("粉丝团新成员", $"{danmakuModel.UserModel} 加入了粉丝团", true);
+                            }));
                         }
                         break;
                     }
-                case MessageEnum.Like:
+                case MessageEnum.JoinRoom:
                     {
-                        if (ConfigData.ShowLike)
+                        if (ConfigData.JoinRoom)
                         {
-                            logging($"用户 {danmakuModel.UserModel} 点了喜欢");
-                            AddDMText("点亮",
-                                "用户" + danmakuModel.UserModel + "点了喜欢", true);
+                            logging($"进入房间 : {danmakuModel.UserModel} 来了");
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                AddDMText("进入房间", $"{danmakuModel.UserModel.ToString()} 来了");
+                            }));
+                        }
+                        break;
+                    }
+                case MessageEnum.Subscribe:
+                    {
+                        if (ConfigData.ShowFollow)
+                        {
+                            logging($"新的粉丝 {danmakuModel.UserModel} 的关注");
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                AddDMText("新的粉丝", $"{danmakuModel.UserModel.ToString()} 的关注", true);
+                            }));
                         }
                         break;
                     }

@@ -10,7 +10,7 @@ namespace XiguaDanmakuHelper
     {
         public delegate void Log(string msg, string level = "info");
 
-        public delegate void RoomCounting(long popularity);
+        public delegate void RoomCounting(string popularity);
 
         public delegate void WhenMessage(MessageModel m);
 
@@ -29,7 +29,7 @@ namespace XiguaDanmakuHelper
 
         public Api()
         {
-            liverName = "sy挂神";
+            liverName = "挂神";
         }
 
         public Api(string name)
@@ -70,7 +70,7 @@ namespace XiguaDanmakuHelper
             if (j["extra"]?["member_count"] != null) _roomPopularity = (long)j["extra"]["member_count"];
             if (j["data"]?["popularity"] != null) _roomPopularity = (long)j["data"]["popularity"];
 
-            OnRoomCounting?.Invoke(_roomPopularity);
+            OnRoomCounting?.Invoke(_roomPopularity.ToString());
         }
 
         public async Task<bool> UpdateRoomInfoAsync()
@@ -90,13 +90,13 @@ namespace XiguaDanmakuHelper
                     return false;
                 }
                 var j = JObject.Parse(_text);
-                if (j["room"] is null)
+                if (j["data"] is null)
                 {
                     LogMessage?.Invoke("无法获取Room信息，请与我联系");
                     return false;
                 }
 
-                Title = (string)j["room"]["title"];
+                Title = (string)j["data"][0]["anchor"]["room_name"];
                 user = new User(j);
                 if (isLive && (int)j["room"]?["status"] != 2)
                 {
@@ -107,7 +107,8 @@ namespace XiguaDanmakuHelper
             }
             else
             {
-                var url = $"https://security.snssdk.com/video/app/search/live/?version_code=730&device_platform=android&format=json&keyword={liverName}";
+                //var url = $"https://security.snssdk.com/video/app/search/live/?version_code=730&device_platform=android&format=json&keyword={liverName}";
+                var url = $"https://search.ixigua.com/video/app/search/live/relate_anchor/?device_id=70829103337&aid=32&version_code=836&device_platform=android&m_tab=video&format=json&offset=0&count=1&keyword={liverName}";
                 string _text;
                 try
                 {
@@ -123,21 +124,22 @@ namespace XiguaDanmakuHelper
                 {
                     foreach (var _j in j["data"])
                     {
+                        /*
                         if ((int)_j["block_type"] != 0)
                         {
                             continue;
                         }
-
-                        if (_j["cells"].Any())
+                        */
+                        if (_j["anchor"].Any())
                         {
                             isValidRoom = true;
 
                             try
                             {
-                                isLive = (bool)_j["cells"][0]["anchor"]["user_info"]["is_living"];
-                                RoomID = (long)_j["cells"][0]["anchor"]["room_id"];
-                                liverName = new User((JObject)_j["cells"][0]).ToString();
-                                user = new User((JObject)_j["cells"][0]);
+                                isLive = (bool)_j["anchor"]["user_info"]["is_living"];
+                                RoomID = (long)_j["anchor"]["room_id"];
+                                liverName = new User((JObject)_j).ToString();
+                                user = new User((JObject)_j);
                             }
                             catch (Exception e)
                             {
@@ -178,15 +180,15 @@ namespace XiguaDanmakuHelper
                     return false;
                 }
                 var j = JObject.Parse(_text);
-                if (j["room"] is null)
+                if (j["data"] is null)
                 {
                     LogMessage?.Invoke("无法获取Room信息，请与我联系");
                     return false;
                 }
 
                 isValidRoom = (int)j["base_resp"]?["status_code"] == 0;
-                Title = (string)j["data"]["title"];
-                RoomID = (long)j["data"]["id"];
+                Title = (string)j["data"][0]["anchor"]["room_name"];
+                RoomID = (long)j["data"][0]["anchor"]["room_id"];
                 user = new User(j);
                 if (isLive && (int)j["room"]?["status"] != 2)
                 {
@@ -197,7 +199,8 @@ namespace XiguaDanmakuHelper
             }
             else
             {
-                var url = $"https://security.snssdk.com/video/app/search/live/?version_code=730&device_platform=android&format=json&keyword={liverName}";
+               // var url = $"https://security.snssdk.com/video/app/search/live/?version_code=730&device_platform=android&format=json&keyword={liverName}";
+                var url = $"https://search.ixigua.com/video/app/search/live/relate_anchor/?device_id=70829103337&aid=32&version_code=836&device_platform=android&m_tab=video&format=json&offset=0&count=10&keyword={liverName}";
                 string _text;
                 try
                 {
@@ -213,19 +216,20 @@ namespace XiguaDanmakuHelper
                 {
                     foreach (var _j in j["data"])
                     {
+                        /*
                         if ((int)_j["block_type"] != 0)
                         {
                             continue;
                         }
-
-                        if (_j["cells"].Any())
+                        */
+                        if (_j["anchor"].Any())
                         {
                             try
                             {
                                 isValidRoom = true;
-                                isLive = (bool)_j["cells"][0]["anchor"]["user_info"]["is_living"];
-                                RoomID = (int)_j["cells"][0]["anchor"]["room_id"];
-                                liverName = (new User((JObject)_j["cells"][0])).ToString();
+                                isLive = (bool)_j["anchor"]["user_info"]["is_living"];
+                                RoomID = (int)_j["anchor"]["room_id"];
+                                liverName = (new User((JObject)_j)).ToString();
                             }
                             catch (Exception err)
                             {
@@ -367,10 +371,13 @@ namespace XiguaDanmakuHelper
                         break;
                     case "VideoLiveControlMessage":
                         //Logger.DebugLog(m.ToString());
+                        /*
                         if (isRoomID)
                             UpdateRoomInfoWeb();
                         else
                             UpdateRoomInfo();
+                            */
+                        OnLeave?.Invoke();
                         OnMessage?.Invoke(new MessageModel(MessageEnum.Leave));
                         break;
                     case "VideoLiveDiggMessage":
