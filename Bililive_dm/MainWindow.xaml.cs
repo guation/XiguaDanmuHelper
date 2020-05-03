@@ -18,6 +18,7 @@ using System.Windows.Threading;
 using System.Xml.Serialization;
 //using XiguaDanmakuHelper;
 using GT_XiguaAPI;
+using System.Text;
 
 namespace Bililive_dm
 {
@@ -50,7 +51,7 @@ namespace Bililive_dm
 
         private StoreModel settings;
 
-        public const string version = "2.3.3.14";
+        public const string version = "3.0.0.15";
 
         public ConfigData ConfigData = new ConfigData();
         public Logger Logger = new Logger();
@@ -59,6 +60,8 @@ namespace Bililive_dm
 
         public bool isSaveToggle = false;
 
+        private YuYin YuYin = new YuYin();
+
         public MainWindow()
         {
 
@@ -66,7 +69,6 @@ namespace Bililive_dm
 
             Info.Text += version;
             //初始化日志
-            //LiverName.Text = "挂神";
             //b = new Api();
             b = new XiguaAPI();
             overlay_enabled = true;
@@ -85,6 +87,9 @@ namespace Bililive_dm
             XiguaAPI.OnLeave += OnLiveStop;
             XiguaAPI.LogMessage += b_LogMessage;
             XiguaAPI.OnRoomCounting += b_ReceivedRoomCount;
+
+            YuYin.LogMessage += b_LogMessage;
+            //YuYin.Landu += Landu;
 
             timer = new DispatcherTimer(new TimeSpan(0, 0, 1), DispatcherPriority.Normal, FuckMicrosoft,
                 Dispatcher);
@@ -146,8 +151,12 @@ namespace Bililive_dm
 
             Loaded += MainWindow_Loaded;
             Setting.GetConfig += GetConfig;
-            //Setting.SetConfig += SetConfig;
-            Landu();
+            Setting.GetYuyin += GetYuyin;
+            YuYin.GetConfig += GetConfig;
+
+            //Landu();
+            YuYin.HeCheng();
+
             System.IO.Directory.CreateDirectory("log");//创造日志文件夹
             System.IO.Directory.CreateDirectory("toggle");//创造记录文件夹
             try
@@ -163,51 +172,14 @@ namespace Bililive_dm
                 MessageBox.Show("    欢迎使用西瓜直非官方助手。\n    本软件原作者 q792602257 ，当前分支由 挂神 维护。\n    本软件完全开源，挂神不会以任何形式销售本软件，严禁倒卖。\n    更多说明请前往 更多设置-关于程序 查看，或翻阅软件附带的“说明”文件。\n    您可以在关闭软件后将原安装目录下的Config.json文件覆盖本目录下的Config.json进行配置迁移。", "关于本软件");
 
             }
+#if DEBUG
+            ConfigData.DeBug = true;
+#endif
+
             BlackList = ConfigData.BlackList.Split('|');
-            new Thread(() =>
-            {
-                try
-                {
-                    var data = Common.HttpGet("http://vps.guation.cn:8080/Status");
-                    var json = JObject.Parse(data);
-                    if (ConfigData.CanUpdate)//是否检查更新
-                    {
-                        var version1 = version.Split('.');
-                        var version2 = json["version"].ToString().Split('.');
-                        try
-                        {
-                            if (int.Parse(version1[0]) < int.Parse(version2[0]))
-                            {
-                                logging($"检测到版本更新，当前版本{version}，最新版本{(string)json["version"]}，新版本简介：{(string)json["update"]}。");
-                            }
-                            else if(int.Parse(version1[0]) == int.Parse(version2[0]))
-                            {
-                                if (int.Parse(version1[1]) < int.Parse(version2[1]))
-                                {
-                                    logging($"检测到版本更新，当前版本{version}，最新版本{(string)json["version"]}，新版本简介：{(string)json["update"]}。");
-                                }
-                                else if ((int.Parse(version1[1]) == int.Parse(version2[1])) && (int.Parse(version1[2]) < int.Parse(version2[2]))) 
-                                {
-                                    logging($"检测到版本更新，当前版本{version}，最新版本{(string)json["version"]}，新版本简介：{(string)json["update"]}。");
-                                }
-                            }
-                        }
-                        catch (Exception err)
-                        {
-                            logging("检查更新失败，不影响软件使用。");
-                            logging(err.ToString(), "debug");
-                        }
-                    }
-                    if (json["msg"].ToString() != "") logging("公告：" + json["msg"].ToString());
-                }
-                catch (Exception)
-                {
-                    logging("获取服务器信息失败，弹幕朗读功能可能会受影响。");
-                }
-            })
-            {
-                IsBackground = true
-            }.Start();
+            User.targetBrand = ConfigData.Brand;
+            YuYin.version = version;
+            YuYin.Connect();
         }
 
         private void UpdateUI()
@@ -218,9 +190,9 @@ namespace Bililive_dm
             showChat.IsChecked = ConfigData.ShowChat;
             showPresent.IsChecked = ConfigData.ShowPresent;
             showLike.IsChecked = ConfigData.ShowLike;
+            //showLike.IsChecked = ConfigData.JoinRoom;
             danMu.IsChecked = ConfigData.DanMu;
         }
-
         private void b_LogMessage(string e, string level = "info")
         {
             logging(e, level);
@@ -313,6 +285,7 @@ namespace Bililive_dm
 
         private async void connbtn_Click(object sender, RoutedEventArgs e)
         {
+            User.UserList.Clear();
             Logger.DisplayText("", true);
             Logger.DisplayText("", true);
             Logger.DisplayText("", true);
@@ -338,6 +311,9 @@ namespace Bililive_dm
                 isSaveToggle = false;
                 if (!b.isRoomID)
                     LiverName.Text = b.user.ToString();
+                b.UpdateAdminList();
+                logging(XiguaAPI.UserID.ToString(),"debug");
+                logging(User.AdminList.Count.ToString(),"debug");
             }
             else
             {
@@ -356,7 +332,6 @@ namespace Bililive_dm
             if (CheckAccess())
             {
                 OnlinePopularity.Text = popularity;
-                //AddDMText("当前房间人气", popularity.ToString() + "", true);
             }
             else
             {
@@ -413,7 +388,7 @@ namespace Bililive_dm
                         {
                             logging($"收到礼物 : {danmakuModel.GiftModel.user} 赠送的 {danmakuModel.GiftModel.count} 个 {danmakuModel.GiftModel.GetName()}");
                             Logger.DisplayText($"收到礼物 : {danmakuModel.GiftModel.user} 赠送的 {danmakuModel.GiftModel.count} 个 {danmakuModel.GiftModel.GetName()}", true);
-                            Hecheng($"感谢{danmakuModel.GiftModel.user}赠送的{danmakuModel.GiftModel.count}个{danmakuModel.GiftModel.GetName()}");
+                            Hecheng($"感谢{danmakuModel.GiftModel.user.Name}赠送的{danmakuModel.GiftModel.count}个{danmakuModel.GiftModel.GetName()}");
                             Dispatcher.BeginInvoke(new Action(() =>
                             {
                                 AddDMText("收到礼物", danmakuModel.GiftModel.ToString(), true);
@@ -426,7 +401,7 @@ namespace Bililive_dm
                         if (ConfigData.ShowPresent)
                         {
                             logging($"粉丝团新成员 : {danmakuModel.UserModel} 加入了粉丝团");
-                            Hecheng($"欢迎{danmakuModel.UserModel}加入了粉丝团");
+                            Hecheng($"欢迎{danmakuModel.UserModel.Name}加入了粉丝团");
                             Dispatcher.BeginInvoke(new Action(() =>
                             {
                                 AddDMText("粉丝团新成员", $"{danmakuModel.UserModel} 加入了粉丝团", true);
@@ -438,10 +413,14 @@ namespace Bililive_dm
                     {
                         if (ConfigData.JoinRoom)
                         {
-                            logging($"进入房间 : {danmakuModel.UserModel} 来了");
+                            //logging($"进入房间 : {danmakuModel.UserModel} 来了");
+                            if (danmakuModel.UserModel.isImportant)
+                            {
+                                Hecheng($"欢迎{danmakuModel.UserModel.Name}进入直播间");
+                            }
                             Dispatcher.BeginInvoke(new Action(() =>
                             {
-                                AddDMText("进入房间", $"{danmakuModel.UserModel.ToString()} 来了");
+                                AddDMText("进入房间", $"{danmakuModel.UserModel} 来了");
                             }));
                         }
                         break;
@@ -451,9 +430,10 @@ namespace Bililive_dm
                         if (ConfigData.ShowFollow)
                         {
                             logging($"新的粉丝 {danmakuModel.UserModel} 的关注");
+                            Hecheng($"感谢{danmakuModel.UserModel.Name}的关注");
                             Dispatcher.BeginInvoke(new Action(() =>
                             {
-                                AddDMText("新的粉丝", $"{danmakuModel.UserModel.ToString()} 的关注", true);
+                                AddDMText("新的粉丝", $"{danmakuModel.UserModel} 的关注", true);
                             }));
                         }
                         break;
@@ -553,8 +533,6 @@ namespace Bililive_dm
         private void Setting_OnClick(object sender, RoutedEventArgs e)
         {
             Setting setting = new Setting();
-            //Setting.GetConfig += GetConfig;
-            //Setting.SetConfig += SetConfig;
             setting.ShowDialog();
             ConfigData.Room = LiverName.Text.Trim();
             if (ConfigData.BlackList != "") BlackList = ConfigData.BlackList.Split('|');
@@ -568,11 +546,6 @@ namespace Bililive_dm
 
         private void Disconnbtn_OnClick(object sender, RoutedEventArgs e)
         {
-            /*
-            abc[0] = 0;//清除弹幕统计
-            abc[1] = 0;//清除计划任务
-            abc[2] = 0;//关闭弹幕朗读
-            */
             lock (DanmuHecheng)
             {
                 while (true)
@@ -626,13 +599,14 @@ namespace Bililive_dm
         // 合成
         public void Hecheng(string wenzi, bool isChat = false)
         {
-            if (wenzi == "") return;
+            if (wenzi == "") 
+                return;
             if (ConfigData.DanMu)
             {
                 if (isChat) {
-                    if (wenzi.Length > ConfigData.maxSize) return;
+                    if (wenzi.Length > ConfigData.maxSize)
+                        return;
                     if (ConfigData.BlackList != "")
-                    {
                         foreach (var Black in BlackList)
                         {
                             var black = Black.Trim();
@@ -644,70 +618,12 @@ namespace Bililive_dm
                             {
                                 logging(err.ToString(), "debug");
                             }
-
                         }
-                    }
+
                 }
-                lock (DanmuHecheng)
-                {
-                    DanmuHecheng.Enqueue(wenzi);
-                }
-                /*
-                var url = $"http://vps.guation.cn:8080/?msg={wenzi}&spd={ConfigData.spd}&pit={ConfigData.pit}&vol={ConfigData.vol}&per={ConfigData.per}";
-                if (Common.HttpDownload(url, "tmp/" + abc[0] + ".mp3"))
-                {
-                    abc[0]++;
-                    abc[2]++;
-                }*/
+                lock (YuYin.DanmuHecheng)
+                    YuYin.DanmuHecheng.Enqueue(wenzi);
             }
-        }
-
-        private void Landu()
-        {
-            var count = 0;
-            Mp3Player mp3Player = new Mp3Player();
-            Thread td = new Thread((ThreadStart)delegate //不在主线程运行时无法打开音频文件,需要进行委托 https://zhidao.baidu.com/question/1988707588257169467.html
-            {
-                while (true)
-                {
-                    lock (DanmuHecheng)
-                    {
-                        if (DanmuHecheng.Any()){
-                            var url = $"http://vps.guation.cn:8080/?msg={DanmuHecheng.Dequeue()}&spd={ConfigData.spd}&pit={ConfigData.pit}&vol={ConfigData.vol}&per={ConfigData.per}";
-                            if (Common.HttpDownload(url, "tmp/" + count + ".mp3"))
-                            {
-                                mp3Player.AutoPlay("tmp/" + count + ".mp3");
-                                count++;
-                                /*
-                                abc[0]++;
-                                abc[2]++;*/
-                            }
-                            if (DanmuHecheng.Count > ConfigData.maxCapacity) {
-                                logging("弹幕缓存上限已跳过朗读部分弹幕。");
-                                for (var i = 0; i < ConfigData.maxCapacity - 1 ; i++) 
-                                    _ = DanmuHecheng.Dequeue();
-                            }
-                        }
-                    }
-                    /*
-                    if (abc[2] > 0)
-                    {
-                        mp3Player.AutoPlay("tmp/" + abc[1] + ".mp3");
-                        abc[1]++;
-                        abc[2]--;
-                    }
-                    if (abc[2] > ConfigData.maxCapacity)
-                    {
-                        abc[1] = abc[0] - 1;
-                        abc[2] = 1;//朗读最后一条弹幕
-                        logging("弹幕缓存上限已跳过朗读部分弹幕。");
-                    }*/
-                    Thread.Sleep(200);
-                }
-            });
-            td.SetApartmentState(ApartmentState.STA);
-            td.IsBackground = true;
-            td.Start();
         }
 
         private string Runcmd(string str)//自动升级暂留接口
@@ -731,22 +647,22 @@ namespace Bililive_dm
             p.Close();
             return output;
         }
-        /*
-        public void SetConfig(ConfigData configData)
-        {
-            ConfigData = configData;
-            Config.Write(ConfigData);
-        }*/
+
         public ConfigData GetConfig()
         {
             return ConfigData;
         }
 
-        #region Runtime settings
+        public YuYin GetYuyin()
+        {
+            return YuYin;
+        }
+
+#region Runtime settings
 
         private readonly bool overlay_enabled = true;
 
-        #endregion
+#endregion
 
         private void ShowChat_OnUnchecked(object sender, RoutedEventArgs e)
         {
@@ -770,29 +686,35 @@ namespace Bililive_dm
 
         private void showBrand_OnChecked(object sender, RoutedEventArgs e)
         {
-            ConfigData.ShowBrand = User.showBrand = true;
+            ConfigData.ShowBrand = true;
+            User.showBrand = true;
         }
 
         private void showBrand_OnUnchecked(object sender, RoutedEventArgs e)
         {
-            ConfigData.ShowBrand = User.showBrand = false;
+            ConfigData.ShowBrand = false;
+            User.showBrand = false;
         }
         private void showGrade_OnChecked(object sender, RoutedEventArgs e)
         {
             ConfigData.ShowGrade = true;
+            User.showPay = true;
         }
         private void showGrade_OnUnchecked(object sender, RoutedEventArgs e)
         {
             ConfigData.ShowGrade = false;
+            User.showPay = false;
         }
 
         private void ShowLike_OnChecked(object sender, RoutedEventArgs e)
         {
             ConfigData.ShowLike = true;
+            ConfigData.JoinRoom = true;
         }
         private void ShowLike_OnUnchecked(object sender, RoutedEventArgs e)
         {
             ConfigData.ShowLike = false;
+            ConfigData.JoinRoom = false;
         }
         private void Danmu_OnChecked(object sender, RoutedEventArgs e)
         {

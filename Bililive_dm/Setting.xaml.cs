@@ -1,23 +1,26 @@
-﻿using Microsoft.VisualBasic;
+﻿using GT_XiguaAPI;
+using Microsoft.VisualBasic;
 using System;
 using System.Management;
 using System.Windows;
 using System.Windows.Controls;
-using XiguaDanmakuHelper;
+//using XiguaDanmakuHelper;
+
 
 namespace Bililive_dm
 {
     /// <summary>
     /// Setting.xaml 的交互逻辑
     /// </summary>
-    public delegate ConfigData getConfig();
-    public delegate void setConfig(ConfigData configData);
+    public delegate ConfigData GetConfig();
+    public delegate YuYin GetYuyin();
 
     public partial class Setting : Window
     {
-        public static event getConfig GetConfig;
-        //public static event setConfig SetConfig;
+        public static event GetConfig GetConfig;
+        public static event GetYuyin GetYuyin;
         public ConfigData configData;
+        public YuYin YuYin;
         private bool isInt = false;
 
 
@@ -25,6 +28,7 @@ namespace Bililive_dm
         {
             InitializeComponent();
             configData = GetConfig?.Invoke();
+            YuYin = GetYuyin?.Invoke();
             slider1.Value = configData.spd;
             slider2.Value = configData.pit;
             slider3.Value = configData.vol;
@@ -64,7 +68,7 @@ namespace Bililive_dm
             string msg = Interaction.InputBox("输入您的反馈内容，点击确定提交，点击取消离开。注意：我们将会收集您的机器码一并提交，机器码仅做识别用户依据不包含您的隐私信息。特别说明：机器反馈渠道优先级较低，反馈内容可能无法及时处理，建议通过人工渠道反馈。", "用户反馈", null, -1, -1);
             string data;
             if (msg == "") return;
-            msg= System.Web.HttpUtility.UrlEncode(msg);
+            //msg= System.Web.HttpUtility.UrlEncode(msg);
             try
             {
                 string cpuInfo = " ";
@@ -78,12 +82,16 @@ namespace Bililive_dm
                         mo.Dispose();
                     }
                 }
-                string str = "{" + $"\"msg\": \"{msg}\" , \"cpuInfo\": \"{cpuInfo}\" , \"Room\": \"{configData.Room}\"" + "}";
-                data = Common.HttpPost("http://vps.guation.cn:8080/Feedback", str);
+                //string str = "{" + $"\"msg\": \"{msg}\" , \"cpuInfo\": \"{cpuInfo}\" , \"Room\": \"{configData.Room}\"" + "}";
+                if(YuYin.Feedback(msg, cpuInfo))
+                    data = "反馈内容已提交,您的ID：" + cpuInfo;
+                else
+                    data = "服务器未连接";
+                //data = Common.HttpPost("http://vps.guation.cn:8080/Feedback", str);
             }
             catch (Exception err)
             {
-                data = "用户反馈发生了错误，请稍后再试。" + err.ToString();
+                data = "用户反馈发生了错误" + err.ToString();
             }
             MessageBox.Show(data, "用户反馈");
         }
@@ -94,17 +102,25 @@ namespace Bililive_dm
 
         private void Slider1_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (isInt) configData.spd = (int)slider1.Value;
+            if (isInt) {
+                configData.spd = (int)slider1.Value;
+            }
         }
 
         private void Slider2_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (isInt) configData.pit = (int)slider2.Value;
+            if (isInt)
+            {
+                configData.pit = (int)slider2.Value;
+            }
         }
 
         private void Slider3_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (isInt) configData.vol = (int)slider3.Value;
+            if (isInt)
+            {
+                configData.vol = (int)slider3.Value;
+            }
         }
 
         private void Slider4_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -139,6 +155,7 @@ namespace Bililive_dm
         private void Clossing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             configData.BlackList = Textbox.Text;
+            User.targetBrand = configData.Brand;
         }
     }
 }

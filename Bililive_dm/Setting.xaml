@@ -62,7 +62,6 @@
             <TextBlock  TextWrapping="Wrap" Text="朗读屏蔽词" VerticalAlignment="Center" Width="80" TextAlignment="Right"
                        Margin="0,0,20,0" Height="25" />
             <TextBox x:Name="Textbox" FontSize="14" VerticalContentAlignment="Stretch" Height="25" VerticalAlignment="Top" ToolTip="需要屏蔽的内容，以|为分割，支持正则表达式"/>
-
         </DockPanel>
         <StackPanel DockPanel.Dock="Top">
             <Button Content="关闭窗口" Height="30" Click="Button_Click_1"/>
