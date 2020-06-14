@@ -51,7 +51,7 @@ namespace Bililive_dm
 
         private StoreModel settings;
 
-        public const string version = "3.0.0.15";
+        public const string version = "3.0.3.18";
 
         public ConfigData ConfigData = new ConfigData();
         public Logger Logger = new Logger();
@@ -153,7 +153,7 @@ namespace Bililive_dm
             Setting.GetConfig += GetConfig;
             Setting.GetYuyin += GetYuyin;
             YuYin.GetConfig += GetConfig;
-
+            XiguaAPI.GetYuyin += GetYuyin;
             //Landu();
             YuYin.HeCheng();
 
@@ -235,6 +235,7 @@ namespace Bililive_dm
         private void MainWindow_Closed(object sender, EventArgs e)
         {
             ConfigData.Room = LiverName.Text.Trim();
+            ConfigData.Brand = User.targetBrand;
             Config.Write(ConfigData);
             if (isSaveToggle == false) 
                 Logger.SaveToggle();
@@ -312,8 +313,10 @@ namespace Bililive_dm
                 if (!b.isRoomID)
                     LiverName.Text = b.user.ToString();
                 b.UpdateAdminList();
+                b.UpdateBrand();
                 logging(XiguaAPI.UserID.ToString(),"debug");
-                logging(User.AdminList.Count.ToString(),"debug");
+                logging(User.AdminList.Count.ToString(), "debug");
+                logging(User.targetBrand, "debug");
             }
             else
             {
@@ -356,7 +359,7 @@ namespace Bililive_dm
                     {
                         logging(danmakuModel.ChatModel.ToString());
                         Logger.DisplayText(danmakuModel.ChatModel.ToString());
-                        Hecheng(DelEmoji.delEmoji(danmakuModel.ChatModel.content), true);
+                        Hecheng(danmakuModel.ChatModel);
                         
                         new Thread(()=> {//创建一个线程来发送歌曲信息 防止因为点歌姬未开启导致的线程阻塞引发崩溃
                             var a = danmakuModel.ChatModel.content;
@@ -374,8 +377,6 @@ namespace Bililive_dm
                             }
                         }).Start();
 
-                        //经过多次测试发现弹幕中部分emoji不能被语音合成程序处理而导致主线程阻塞引发程序崩溃
-                        //即使未引发崩溃也会导致程序不能继续正常工作出现假死状态
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
                             AddDMText(danmakuModel.ChatModel.user, danmakuModel.ChatModel.content);
@@ -396,13 +397,28 @@ namespace Bililive_dm
                         }
                         break;
                     }
+                case MessageEnum.LuckyBox:
+                    {
+                        if (ConfigData.ShowPresent)
+                        {
+                            logging($"收到礼物 : {danmakuModel.LuckyBox}");
+                            Logger.DisplayText($"收到礼物 : {danmakuModel.LuckyBox}", true);
+                            Hecheng($"感谢{danmakuModel.LuckyBox}");
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                AddDMText("红包礼物", danmakuModel.LuckyBox.ToString(), true);
+                            }));
+                        }
+                        break;
+                    }
                 case MessageEnum.JoinFansclub:
                     {
                         if (ConfigData.ShowPresent)
                         {
                             logging($"粉丝团新成员 : {danmakuModel.UserModel} 加入了粉丝团");
                             Hecheng($"欢迎{danmakuModel.UserModel.Name}加入了粉丝团");
-                            Dispatcher.BeginInvoke(new Action(() =>
+                            Logger.DisplayText($"粉丝团 : {danmakuModel.UserModel} 加入了粉丝团");
+                           Dispatcher.BeginInvoke(new Action(() =>
                             {
                                 AddDMText("粉丝团新成员", $"{danmakuModel.UserModel} 加入了粉丝团", true);
                             }));
@@ -413,24 +429,34 @@ namespace Bililive_dm
                     {
                         if (ConfigData.JoinRoom)
                         {
-                            //logging($"进入房间 : {danmakuModel.UserModel} 来了");
                             if (danmakuModel.UserModel.isImportant)
                             {
                                 Hecheng($"欢迎{danmakuModel.UserModel.Name}进入直播间");
+                                logging($"进入房间 : {danmakuModel.UserModel} 来了");
                             }
-                            Dispatcher.BeginInvoke(new Action(() =>
+                            if (ConfigData.ImportantJoinRoom)
                             {
-                                AddDMText("进入房间", $"{danmakuModel.UserModel} 来了");
-                            }));
+                                if (danmakuModel.UserModel.isImportant)
+                                    Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        AddDMText("进入房间", $"{danmakuModel.UserModel} 来了");
+                                    }));
+                            }
+                            else
+                                Dispatcher.BeginInvoke(new Action(() =>
+                                {
+                                    AddDMText("进入房间", $"{danmakuModel.UserModel} 来了");
+                                }));
                         }
                         break;
                     }
                 case MessageEnum.Subscribe:
                     {
-                        if (ConfigData.ShowFollow)
+                        if (ConfigData.ShowFollow && danmakuModel.UserModel.Name != "") 
                         {
                             logging($"新的粉丝 {danmakuModel.UserModel} 的关注");
                             Hecheng($"感谢{danmakuModel.UserModel.Name}的关注");
+                            Logger.DisplayText($"新的粉丝：{danmakuModel.UserModel} 的关注");
                             Dispatcher.BeginInvoke(new Action(() =>
                             {
                                 AddDMText("新的粉丝", $"{danmakuModel.UserModel} 的关注", true);
@@ -597,6 +623,25 @@ namespace Bililive_dm
         }
 
         // 合成
+        public void Hecheng(Chat chat)
+        {
+            if (ConfigData.BlackList != "")
+                foreach (var Black in BlackList)
+                {
+                    if (Black.Contains("Name:"))
+                    {
+                        var black = Black.Replace("Name:", "");
+                        if (chat.user.Name == black) return;
+                    }else if (Black.Contains("Name："))
+                    {
+                        var black = Black.Replace("Name：", "");
+                        if (chat.user.Name == black.Trim()) return;
+                    }
+                }
+            //经过多次测试发现弹幕中部分emoji不能被语音合成程序处理而导致主线程阻塞引发程序崩溃
+            //即使未引发崩溃也会导致程序不能继续正常工作出现假死状态
+            Hecheng(DelEmoji.delEmoji(chat.content), true);
+        }
         public void Hecheng(string wenzi, bool isChat = false)
         {
             if (wenzi == "") 
@@ -609,6 +654,7 @@ namespace Bililive_dm
                     if (ConfigData.BlackList != "")
                         foreach (var Black in BlackList)
                         {
+                            if (Black.Contains("Name:") || Black.Contains("Name：")) continue;
                             var black = Black.Trim();
                             try
                             {
@@ -709,12 +755,12 @@ namespace Bililive_dm
         private void ShowLike_OnChecked(object sender, RoutedEventArgs e)
         {
             ConfigData.ShowLike = true;
-            ConfigData.JoinRoom = true;
+            ConfigData.ImportantJoinRoom = true;
         }
         private void ShowLike_OnUnchecked(object sender, RoutedEventArgs e)
         {
             ConfigData.ShowLike = false;
-            ConfigData.JoinRoom = false;
+            ConfigData.ImportantJoinRoom = false;
         }
         private void Danmu_OnChecked(object sender, RoutedEventArgs e)
         {

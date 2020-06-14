@@ -139,8 +139,12 @@
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PresentationUI, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="protobuf-net, Version=2.4.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
+      <HintPath>..\packages\protobuf-net.2.4.6\lib\net40\protobuf-net.dll</HintPath>
+    </Reference>
     <Reference Include="ReachFramework" />
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
@@ -158,6 +162,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Threading.Tasks, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.Threading.Tasks.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -182,7 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\GT_XiguaAPI\GT_XiguaAPI.csproj">
-      <Project>{063EDDCB-C581-4D44-B406-7AB429A782B5}</Project>
+      <Project>{30583FBC-26A4-43CD-8F5C-D0FF0BC3007B}</Project>
       <Name>GT_XiguaAPI</Name>
     </ProjectReference>
     <ProjectReference Include="..\XiguaDanmakuHelper.csproj">

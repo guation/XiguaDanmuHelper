@@ -20,7 +20,6 @@ namespace Bililive_dm
         public static event GetConfig GetConfig;
         public static event GetYuyin GetYuyin;
         public ConfigData configData;
-        public YuYin YuYin;
         private bool isInt = false;
 
 
@@ -28,7 +27,6 @@ namespace Bililive_dm
         {
             InitializeComponent();
             configData = GetConfig?.Invoke();
-            YuYin = GetYuyin?.Invoke();
             slider1.Value = configData.spd;
             slider2.Value = configData.pit;
             slider3.Value = configData.vol;
@@ -68,7 +66,6 @@ namespace Bililive_dm
             string msg = Interaction.InputBox("输入您的反馈内容，点击确定提交，点击取消离开。注意：我们将会收集您的机器码一并提交，机器码仅做识别用户依据不包含您的隐私信息。特别说明：机器反馈渠道优先级较低，反馈内容可能无法及时处理，建议通过人工渠道反馈。", "用户反馈", null, -1, -1);
             string data;
             if (msg == "") return;
-            //msg= System.Web.HttpUtility.UrlEncode(msg);
             try
             {
                 string cpuInfo = " ";
@@ -82,12 +79,10 @@ namespace Bililive_dm
                         mo.Dispose();
                     }
                 }
-                //string str = "{" + $"\"msg\": \"{msg}\" , \"cpuInfo\": \"{cpuInfo}\" , \"Room\": \"{configData.Room}\"" + "}";
-                if(YuYin.Feedback(msg, cpuInfo))
+                if((bool)GetYuyin?.Invoke()?.Feedback(msg, cpuInfo))
                     data = "反馈内容已提交,您的ID：" + cpuInfo;
                 else
                     data = "服务器未连接";
-                //data = Common.HttpPost("http://vps.guation.cn:8080/Feedback", str);
             }
             catch (Exception err)
             {
