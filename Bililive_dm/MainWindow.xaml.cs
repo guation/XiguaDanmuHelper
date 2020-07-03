@@ -51,7 +51,7 @@ namespace Bililive_dm
 
         private StoreModel settings;
 
-        public const string version = "3.0.3.18";
+        public const string version = "3.0.4.19";
 
         public ConfigData ConfigData = new ConfigData();
         public Logger Logger = new Logger();
@@ -314,6 +314,7 @@ namespace Bililive_dm
                     LiverName.Text = b.user.ToString();
                 b.UpdateAdminList();
                 b.UpdateBrand();
+                logging($"主播 {b.user.Name} ， 正在直播 {b.Title} 。");
                 logging(XiguaAPI.UserID.ToString(),"debug");
                 logging(User.AdminList.Count.ToString(), "debug");
                 logging(User.targetBrand, "debug");
@@ -460,6 +461,18 @@ namespace Bililive_dm
                             Dispatcher.BeginInvoke(new Action(() =>
                             {
                                 AddDMText("新的粉丝", $"{danmakuModel.UserModel} 的关注", true);
+                            }));
+                        }
+                        break;
+                    }
+                case MessageEnum.Like:
+                    {
+                        if (!ConfigData.ShowLike) 
+                        {
+                            logging($"{danmakuModel.Like}");
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                AddDMText("点亮消息", $"{danmakuModel.Like}", true);
                             }));
                         }
                         break;
