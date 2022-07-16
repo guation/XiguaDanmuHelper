@@ -11,8 +11,8 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Guation")]
 [assembly: AssemblyProduct("西瓜直播弹幕助手")]
-[assembly: AssemblyCopyright("挂神")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCopyright("Copyright ©  2019-2021")]
+[assembly: AssemblyTrademark("挂神")]
 [assembly: AssemblyCulture("")]
 
 // 將 ComVisible 設定為 false 會使得這個組件中的型別
@@ -52,5 +52,5 @@ using System.Windows;
 // 指定為預設值:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("2.2.0.6")]
-[assembly: AssemblyFileVersion("2.2.0.6")]
+[assembly: AssemblyVersion("3.2.2.27")]
+[assembly: AssemblyFileVersion("3.2.2.27")]

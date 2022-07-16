@@ -233,7 +233,8 @@ namespace Bililive_dm
                 FlowDirection,
                 new Typeface(FontFamily, FontStyle, FontWeight, FontStretches.Normal),
                 FontSize,
-                Brushes.Black);
+                Brushes.Black,
+                VisualTreeHelper.GetDpi(this).PixelsPerDip);
 
             UpdateFormattedText();
         }

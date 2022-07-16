@@ -19,6 +19,7 @@ using System.Xml.Serialization;
 //using XiguaDanmakuHelper;
 using GT_XiguaAPI;
 using System.Text;
+using NAudio.Wave;
 
 namespace Bililive_dm
 {
@@ -45,13 +46,13 @@ namespace Bililive_dm
         //private Api b;
         private XiguaAPI b;
         private IDanmakuWindow fulloverlay;
-        private Thread getDanmakuThread;
+        //private Thread getDanmakuThread;
         public MainOverlay overlay;
         private readonly Thread releaseThread;
 
         private StoreModel settings;
 
-        public const string version = "3.0.4.19";
+        public const string version = "4.0.1.28";
 
         public ConfigData ConfigData = new ConfigData();
         public Logger Logger = new Logger();
@@ -68,6 +69,7 @@ namespace Bililive_dm
             InitializeComponent();
 
             Info.Text += version;
+            XiguaData.version = version;
             //初始化日志
             //b = new Api();
             b = new XiguaAPI();
@@ -106,20 +108,20 @@ namespace Bililive_dm
                 }
             });
             releaseThread.IsBackground = true;
-            getDanmakuThread = new Thread(() =>
-            {
-                while (true)
-                    if (b.isLive)
-                    {
-                        b.GetDanmaku();
-                        Thread.Sleep(1000);
-                    }
-                    else
-                    {
-                        Thread.Sleep(100000);
-                    }
-            });
-            getDanmakuThread.IsBackground = true;
+            //getDanmakuThread = new Thread(() =>
+            //{
+            //    while (true)
+            //        if (b.isLive)
+            //        {
+            //            b.GetDanmaku();
+            //            Thread.Sleep(1000);
+            //        }
+            //        else
+            //        {
+            //            Thread.Sleep(100000);
+            //        }
+            //});
+            //getDanmakuThread.IsBackground = true;
             //            releaseThread.Start();
             ProcDanmakuThread = new Thread(() =>
             {
@@ -159,10 +161,21 @@ namespace Bililive_dm
 
             System.IO.Directory.CreateDirectory("log");//创造日志文件夹
             System.IO.Directory.CreateDirectory("toggle");//创造记录文件夹
+            System.IO.Directory.CreateDirectory("common");//创造自定义语音文件夹
             try
             {
                 ConfigData = (ConfigData)Config.Read();
                 UpdateUI();
+                for (int deviceid = 0; deviceid < WaveOut.DeviceCount; deviceid++)
+                {
+                    var capabilities = WaveOut.GetCapabilities(deviceid);
+                    //logging(capabilities.ProductName);
+                    if (ConfigData.AudioDeviceName == capabilities.ProductName)
+                    {
+                        YuYin.waveOutDevice.DeviceNumber = deviceid;
+                        break;
+                    }
+                }
             }
             catch
             {
@@ -177,7 +190,7 @@ namespace Bililive_dm
 #endif
 
             BlackList = ConfigData.BlackList.Split('|');
-            User.targetBrand = ConfigData.Brand;
+            //User.targetBrand = ConfigData.Brand;
             YuYin.version = version;
             YuYin.Connect();
         }
@@ -235,7 +248,7 @@ namespace Bililive_dm
         private void MainWindow_Closed(object sender, EventArgs e)
         {
             ConfigData.Room = LiverName.Text.Trim();
-            ConfigData.Brand = User.targetBrand;
+            //ConfigData.Brand = User.targetBrand;
             Config.Write(ConfigData);
             if (isSaveToggle == false) 
                 Logger.SaveToggle();
@@ -300,24 +313,24 @@ namespace Bililive_dm
 
             ConnBtn.IsEnabled = false;
             DisconnBtn.IsEnabled = false;
-            var connectresult = false;
             logging("正在连接");
-            connectresult = await b.ConnectAsync();
+            bool connectresult = await b.ConnectAsync();
             if (connectresult)
             {
                 logging("连接成功");
                 AddDMText("提示", "连接成功", true);
-                getDanmakuThread.Start();
+                //getDanmakuThread.Start();
                 logging(b.RoomID.ToString(), "debug");
                 isSaveToggle = false;
                 if (!b.isRoomID)
                     LiverName.Text = b.user.ToString();
-                b.UpdateAdminList();
-                b.UpdateBrand();
-                logging($"主播 {b.user.Name} ， 正在直播 {b.Title} 。");
+                await b.UpdateAdminListAsync();
+                await b.UpdateBrandAsync();
+                logging($"主播 {b.user.Name} ，正在直播 {b.Title} 。");
                 logging(XiguaAPI.UserID.ToString(),"debug");
                 logging(User.AdminList.Count.ToString(), "debug");
                 logging(User.targetBrand, "debug");
+                await b.StartDanmakuAsync();
             }
             else
             {
@@ -388,7 +401,7 @@ namespace Bililive_dm
                     {
                         if (ConfigData.ShowPresent && danmakuModel.GiftModel.isEnd)
                         {
-                            logging($"收到礼物 : {danmakuModel.GiftModel.user} 赠送的 {danmakuModel.GiftModel.count} 个 {danmakuModel.GiftModel.GetName()}");
+                            logging($"收到礼物 : {danmakuModel.GiftModel.user} 赠送的 {danmakuModel.GiftModel.count} 个 {danmakuModel.GiftModel.GetName()}[{danmakuModel.GiftModel.GetValue()}]");
                             Logger.DisplayText($"收到礼物 : {danmakuModel.GiftModel.user} 赠送的 {danmakuModel.GiftModel.count} 个 {danmakuModel.GiftModel.GetName()}", true);
                             Hecheng($"感谢{danmakuModel.GiftModel.user.Name}赠送的{danmakuModel.GiftModel.count}个{danmakuModel.GiftModel.GetName()}");
                             Dispatcher.BeginInvoke(new Action(() =>
@@ -575,12 +588,29 @@ namespace Bililive_dm
             setting.ShowDialog();
             ConfigData.Room = LiverName.Text.Trim();
             if (ConfigData.BlackList != "") BlackList = ConfigData.BlackList.Split('|');
-
+            for (int deviceid = 0; deviceid < WaveOut.DeviceCount; deviceid++)
+            {
+                var capabilities = WaveOut.GetCapabilities(deviceid);
+                //logging(capabilities.ProductName);
+                if (ConfigData.AudioDeviceName == capabilities.ProductName)
+                {
+                    YuYin.waveOutDevice.DeviceNumber = deviceid;
+                    return;
+                }
+            }
+            YuYin.waveOutDevice.DeviceNumber = -1;
         }
         private void OnLiveStop()
         {
-            logging("提示：主播已下播");
-            Disconnbtn_OnClick(this, new RoutedEventArgs());
+            //logging("提示：主播已下播");
+            if (DisconnBtn.CheckAccess())
+            {
+                Disconnbtn_OnClick(this, new RoutedEventArgs());
+            }
+            else
+            {
+                DisconnBtn.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => OnLiveStop()));
+            }
         }
 
         private void Disconnbtn_OnClick(object sender, RoutedEventArgs e)
@@ -600,21 +630,22 @@ namespace Bililive_dm
                 }
             }
             ConnBtn.IsEnabled = true;
-            getDanmakuThread.Abort();
-            getDanmakuThread = new Thread(() =>
-            {
-                while (true)
-                    if (b.isLive)
-                    {
-                        b.GetDanmaku();
-                        Thread.Sleep(1000);
-                    }
-                    else
-                    {
-                        Thread.Sleep(100000);
-                    }
-            })
-            { IsBackground = true };
+            b.StopDanmaku();
+            //getDanmakuThread.Abort();
+            //getDanmakuThread = new Thread(() =>
+            //{
+            //    while (true)
+            //        if (b.isLive)
+            //        {
+            //            b.GetDanmaku();
+            //            Thread.Sleep(1000);
+            //        }
+            //        else
+            //        {
+            //            Thread.Sleep(100000);
+            //        }
+            //})
+            //{ IsBackground = true };
             logging(Logger.SaveToggle());
             isSaveToggle = true;
         }

@@ -6,7 +6,7 @@
         xmlns:bililiveDm="clr-namespace:Bililive_dm"
         xmlns:local="clr-namespace:Bililive_dm"
         mc:Ignorable="d"
-        Title="全局设置" Height="294" Width="500 " ResizeMode="NoResize" Closing="Clossing">
+        Title="全局设置" Height="320" Width="500 " ResizeMode="NoResize" Closing="Clossing">
     <StackPanel>
         <DockPanel Height="25">
             <TextBlock TextWrapping="Wrap" Text="朗读缓存上限" VerticalAlignment="Center" Width="80" TextAlignment="Right"
@@ -57,6 +57,11 @@
             <RadioButton x:Name="RadioButton2" Content="男声" Checked="RadioButton2_Checked"/>
             <RadioButton x:Name="RadioButton3" Content="度逍遥" Checked="RadioButton3_Checked"/>
             <RadioButton x:Name="RadioButton4" Content="度丫丫" Checked="RadioButton4_Checked"/>
+        </DockPanel>
+        <DockPanel Height="25">
+            <TextBlock TextWrapping="Wrap" Text="音频输出声卡" VerticalAlignment="Top" Width="80" TextAlignment="Right"
+                       Margin="0,0,20,0" Height="25" />
+            <ComboBox x:Name="audiolist" Height="25" VerticalAlignment="Top" SelectionChanged="audiolist_SelectionChanged"/>
         </DockPanel>
         <DockPanel Height="25">
             <TextBlock  TextWrapping="Wrap" Text="朗读屏蔽词" VerticalAlignment="Center" Width="80" TextAlignment="Right"

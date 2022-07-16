@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("XiguaApi")]
 [assembly: AssemblyDescription("XiguaApi")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("JerryYan")]
+[assembly: AssemblyCompany("JerryYan/Guation")]
 [assembly: AssemblyProduct("XiguaApi")]
-[assembly: AssemblyCopyright("Copyright ©  2019")]
+[assembly: AssemblyCopyright("Copyright ©  2019-2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -1,5 +1,6 @@
 ﻿using GT_XiguaAPI;
 using Microsoft.VisualBasic;
+using NAudio.Wave;
 using System;
 using System.Management;
 using System.Windows;
@@ -48,6 +49,17 @@ namespace Bililive_dm
             }
             Textbox.Text = configData.BlackList;
             slider0.Value = configData.maxCapacity;
+            audiolist.Items.Add("Windows默认输出设备");
+            audiolist.SelectedIndex = 0;
+
+            for (int deviceid = 0; deviceid < WaveOut.DeviceCount; deviceid++)
+            {
+                var capabilities = WaveOut.GetCapabilities(deviceid);
+                audiolist.Items.Add(capabilities.ProductName);
+                if (configData.AudioDeviceName == capabilities.ProductName)
+                    audiolist.SelectedIndex = deviceid + 1;
+                //ProductName即是声卡名称
+            }
             isInt = true;
         }
 
@@ -63,7 +75,7 @@ namespace Bililive_dm
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            string msg = Interaction.InputBox("输入您的反馈内容，点击确定提交，点击取消离开。注意：我们将会收集您的机器码一并提交，机器码仅做识别用户依据不包含您的隐私信息。特别说明：机器反馈渠道优先级较低，反馈内容可能无法及时处理，建议通过人工渠道反馈。", "用户反馈", null, -1, -1);
+            string msg = Interaction.InputBox("输入您的反馈内容，点击确定提交，点击取消离开。我们会将您的反馈内容转发到挂神QQ以便及时处理，如果您无法通过一句话描述问题请使用QQ与挂神取得联系。注意：我们将会收集您的机器码一并提交，机器码仅做识别用户依据不包含您的隐私信息。", "用户反馈", null, -1, -1);
             string data;
             if (msg == "") return;
             try
@@ -147,10 +159,19 @@ namespace Bililive_dm
             TextBox.Text = RadioButton4.Content.ToString();
         }
 
+        private void audiolist_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (isInt)
+            {
+                configData.AudioDeviceName = audiolist.Text;
+            }
+        }
+
         private void Clossing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             configData.BlackList = Textbox.Text;
-            User.targetBrand = configData.Brand;
+            //User.targetBrand = configData.Brand;
+            configData.AudioDeviceName = audiolist.Text;
         }
     }
 }

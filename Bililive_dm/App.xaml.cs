@@ -11,10 +11,12 @@ namespace Bililive_dm
     /// </summary>
     public partial class App : Application
     {
+        private System.Threading.Mutex mutex;
         public App()
         {
             AddArchSpecificDirectory();
             Current.DispatcherUnhandledException += App_DispatcherUnhandledException;
+            this.Startup += new StartupEventHandler(App_Startup);
         }
 
         [DllImport("kernel32", EntryPoint = "SetDllDirectoryW", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -50,6 +52,18 @@ namespace Bililive_dm
             }
 
             Environment.Exit(1);
+        }
+        private void App_Startup(object sender, StartupEventArgs e)
+        {
+            string path = System.IO.Directory.GetCurrentDirectory().Replace("\\", "/");
+            mutex = new System.Threading.Mutex(true, path, out bool ret);
+
+            if (!ret)
+            {
+                MessageBox.Show("弹幕姬无法在同一目录下多次运行。" + path);
+                Environment.Exit(0);
+            }
+
         }
     }
 }
